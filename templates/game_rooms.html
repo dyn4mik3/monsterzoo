@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+	<h1>Rooms</h1>
+    <ul>
+	    {% for room in live_rooms %}
+            <li>{{ room }}</li>
+        {% endfor %}
+    </ul>
+
+    <h1>Users</h1>
+    <ul>
+        {% for user in users %}
+        <li>{{ user }}</li>
+        {% endfor %}
+    </ul>
+
+		
+	<h1>Create a Room</h1>
+	<form method="post" action="{{ url_for('create_room') }}">
+		<input type="text" id="name" name="name">
+		<input type="submit" id="submit" value="Add Room">
+	</form>
+{% endblock content %}
