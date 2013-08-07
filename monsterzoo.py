@@ -153,12 +153,22 @@ class Player(object):
     def play(self, card):
         card.play(self)
 
+class Wild(Player):
+    def __init__(self, player_id='wild'):
+        starter_deck = [OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly()]
+        self.deck = Deck()
+        self.deck.cards = list(starter_deck)
+        self.hand = Hand()
+        self.discard = Deck()
+        self.player_id = player_id
+
 class Game(object):
     def __init__(self, players):
         #self.num_of_players = num_of_players
 
         self.players = players
         self.num_of_players = len(players)
+        self.wild = Wild()
 
         # create a dictionary of player items (hands, decks, discards, zoos, etc) for each player
         #for player in range(num_of_players):
@@ -168,6 +178,7 @@ class Game(object):
         for player in self.players:
             player.deck.shuffle_cards()
             
+        '''
         WILD_DECK = [
             OoglyBoogly(),
             OoglyBoogly(),
@@ -189,7 +200,8 @@ class Game(object):
         self.wild_deck.cards = WILD_DECK
         self.wild_discard = Deck()
         self.wild_hand = Hand() # this is the open face pile in middle
-    
+        '''
+
     def start(self):
         print "Dealing cards to players"
         for player in self.players:
@@ -197,7 +209,7 @@ class Game(object):
             player.deal(5)
         
         print "Dealing cards to the Wild"
-        self.wild_deck.deal(self.wild_hand, 5)
+        self.wild.deal(5)
         self.status()
     
     def status(self):
@@ -213,9 +225,9 @@ class Game(object):
 
         print "Wild Status"
         print "==========="
-        print "Wild Deck: %r" % self.wild_deck.cards
-        print "Wild Discard: %r" % self.wild_discard.cards
-        print "Wild Hand: %r" % self.wild_hand.cards
+        print "Wild Deck: %r" % self.wild.deck.cards
+        print "Wild Discard: %r" % self.wild.discard.cards
+        print "Wild Hand: %r" % self.wild.hand.cards
 
     def turn(self, player):
         hand = player.hand
@@ -234,13 +246,13 @@ class Game(object):
             x = 0
             print "Wild Cards"
             print "=========="
-            for card in self.wild_hand.cards:
+            for card in self.wild.hand.cards:
                 print "[%r] - %r" % (x, card)
                 x += 1
             print "Your Food: %r" % player.food
             selection = raw_input("> ")
             try:
-                selected_card = self.wild_hand.cards[int(selection)]
+                selected_card = self.wild.hand.cards[int(selection)]
             except IndexError:
                 print "Not a Valid Selection"
                 return
@@ -248,7 +260,7 @@ class Game(object):
             if selected_card.cost <= player.food:
                 print "Buying card"
                 player.food = player.food - selected_card.cost
-                self.wild_hand.remove_card(selected_card)
+                self.wild.hand.remove_card(selected_card)
                 player.discard.add_to_bottom(selected_card)
             else:
                 print "Not enough food"

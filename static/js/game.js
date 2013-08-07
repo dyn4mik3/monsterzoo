@@ -33,7 +33,7 @@ $(function() {
         var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
-        '" height="120px"></p>' + card_text +
+        '" height="80px"></p>' + card_text +
         '</div>' +
         '<div class="playbutton">' +
         '<button type="button" name="' + card_name + '" class="btn btn-primary btn-mini">Play This Card</button>' +
@@ -47,7 +47,10 @@ $(function() {
     });
 
     socket.on('empty', function(player) {
-        if (player == this.socket.sessionid) {
+        if (player == 'wild') {
+            $('#wild').empty();
+        }
+        else if (player == this.socket.sessionid) {
             $('#player1').empty();
         }
         else {
@@ -59,13 +62,16 @@ $(function() {
         var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
-        '" height="120px"></p>' + card_text +
+        '" height="80px"></p>' + card_text +
         '</div>' +
         '<div class="playbutton">' +
         '<button type="button" ' +
         'name="' + index_location + '" class="btn btn-primary btn-mini play-this">Play This Card</button>' +
         '</div></div>';
-        if (player == this.socket.sessionid) {
+        if (player == 'wild') {
+            $('#wild').append(card_layout);
+        }
+        else if (player == this.socket.sessionid) {
             $('#player1').append(card_layout);
         }
         else {

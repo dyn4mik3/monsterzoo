@@ -54,7 +54,7 @@ code {
 
 /* CARD STUFF */
 .playbutton {
-    width: 180px;
+    width: 120px;
     float:left;
     text-align:center;
     margin: 0 8px 8px 0;
@@ -71,7 +71,7 @@ code {
     height: 280px; 
     margin: 0 8px 8px 0; 
     position: relative; 
-    width: 180px; 
+    width: 120px; 
     z-index: 2; 
 }
 
@@ -91,7 +91,7 @@ code {
 font-weight:bold;
 }
 .card .card_image {
-text-align:center;margin-left:10px;margin-right:10px;margin-top:45px;
+text-align:center;margin-left:8px;margin-right:8px;margin-top:80px;
 }
 /* CHAT BOX */
 

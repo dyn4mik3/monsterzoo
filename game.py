@@ -160,6 +160,16 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.broadcast_event('render_card', player_id, card.name, card.cost, card.image, card.description, location);
             location += 1
 
+    def render_wild(self, wild):
+        location = 0
+        cards = wild.hand.cards
+        self.broadcast_event('empty', 'wild')
+        for card in cards:
+            self.log('Wild requested a card. {%r}' % card)
+            self.broadcast_event('announcement', 'Wild has the following cards: %r' % wild.hand.cards)
+            self.broadcast_event('render_card', 'wild', card.name, card.cost, card.image, card.description, location);
+            location += 1
+
     def on_login(self, username):
         self.log('Username: {0}'.format(username))
         self.session['username'] = username
@@ -179,7 +189,9 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.broadcast_event('announcement', '2 Players have connected')
             self.broadcast_event('game_start', len(self.players))
             self.game = Game(self.players)
-            self.broadcast_event('announcement', "Deck contains %r" % self.game.wild_deck.cards)
+            self.broadcast_event('announcement', "Deck contains %r" % self.game.wild.deck.cards)
+            self.game.wild.deal(5)
+            self.render_wild(self.game.wild)
             for player in self.players:
                 self.broadcast_event('announcement', 'Trying to deal to %s' % player.player_id)
                 for _ in range(5):
