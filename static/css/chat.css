@@ -25,6 +25,10 @@ body {
   z-index:3;
 }
 
+#player1-food, #player2-food, #player1-score, #player2-score {
+    font-size:32px;
+}
+
 /* Lastly, apply responsive CSS fixes as necessary */
 @media (max-width: 767px) {
   #footer {

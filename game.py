@@ -83,7 +83,8 @@ def room():
 class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
     nicknames = {} # stores a dictionary with sessionids as key, Player objects as values
     players = [] # stores a list of Player objects
-    game = None 
+    game = None
+    end_turn = False
 
     def initialize(self):
         user_id = self.socket.sessid
@@ -136,7 +137,23 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         card = player.hand.cards[location]
         card.play(player)
         self.log('Trying to play card %s at index location %s' % (card, location))
-        self.render(player_id)
+        self.log("Game is %r" % self.game)
+        #self.render(player_id)
+        self.render_game()
+
+    def on_buy(self, location):
+        location = int(location)
+        player_id = self.socket.sessid
+        player = self.nicknames[player_id]
+        wild = self.game.wild
+        card = wild.hand.cards[location]
+        self.log('Buying card %r' % card)
+        if card.cost <= player.food:
+            player.food = player.food - card.cost
+            wild.hand.remove_card(card)
+            player.discard.add_to_bottom(card)
+            wild.deal(1)
+            self.render_game()
 
     def on_deal(self, player_id, num = 1):
         player = self.nicknames[player_id]
@@ -148,6 +165,33 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         #    self.broadcast_event('announcement', 'Player {%s} has the following cards: %r' % (player_id, player.hand.cards))
         #    self.broadcast_event('deal_card', player_id, card.name, card.cost, card.image, card.description);
         return True
+
+    def render_game(self):
+        # calculate score
+        self.game.calculate_scores()
+        # render players
+        for player in self.game.players:
+            cards = player.hand.cards
+            zoo = player.zoo.cards
+            self.broadcast_event('empty', player.player_id)
+            location = 0
+            for card in cards: # render cards in hand
+                self.broadcast_event('render_card', player.player_id, card.name, card.cost, card.image, card.description, location);
+                location += 1
+            self.broadcast_event('empty_zoo', player.player_id)
+            for card in zoo: # render cards in zoo
+                self.broadcast_event('render_zoo', player.player_id, card.name, card.cost, card.image, card.description, location);
+            self.broadcast_event('food', player.player_id, player.food)
+            self.broadcast_event('score', player.player_id, player.score)
+        # render wild
+        cards = self.game.wild.hand.cards
+        location = 0
+        self.broadcast_event('empty', 'wild')
+        for card in cards:
+            self.log('Wild requested a card. {%r}' % card)
+            self.broadcast_event('announcement', 'Wild has the following cards: %r' % self.game.wild.hand.cards)
+            self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location);
+            location += 1
 
     def render(self, player_id):
         player = self.nicknames[player_id]
@@ -167,7 +211,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         for card in cards:
             self.log('Wild requested a card. {%r}' % card)
             self.broadcast_event('announcement', 'Wild has the following cards: %r' % wild.hand.cards)
-            self.broadcast_event('render_card', 'wild', card.name, card.cost, card.image, card.description, location);
+            self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location);
             location += 1
 
     def on_login(self, username):
@@ -184,11 +228,12 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.broadcast_event('announcement', '%s has connected' % username)
         self.broadcast_event('announcement', '%s is player %d' % (username, self.players.index(self.nicknames[user_id])+1))
 
-        # Once 2 players login, deal cards
+        # Once 2 players login, start game 
         if len(self.players) == 2:
             self.broadcast_event('announcement', '2 Players have connected')
             self.broadcast_event('game_start', len(self.players))
-            self.game = Game(self.players)
+            GameNamespace.game = Game(self.players)
+            #self.game = GameNamespace.game
             self.broadcast_event('announcement', "Deck contains %r" % self.game.wild.deck.cards)
             self.game.wild.deal(5)
             self.render_wild(self.game.wild)
@@ -197,8 +242,15 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
                 for _ in range(5):
                     self.on_deal(player.player_id)
             self.log('Playing Game')
+            self.broadcast_event('turn', self.players[1].player_id)
+            self.log("Game is %r" % self.game)
 
-        return True, username
+    def on_turn(self):
+        user_id = self.socket.sessid
+        player = self.nicknames[user_id]
+        self.game.setup_next_turn(player)
+        self.render_game()
+        self.broadcast_event('turn', self.socket.sessid)
 
     def on_user_message(self, msg):
         self.log('User message: {0}'.format(msg))

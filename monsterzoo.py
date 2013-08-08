@@ -155,7 +155,7 @@ class Player(object):
 
 class Wild(Player):
     def __init__(self, player_id='wild'):
-        starter_deck = [OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly()]
+        starter_deck = [OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
