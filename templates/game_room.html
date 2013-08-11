@@ -53,9 +53,9 @@
                         </div>
                         <div class="row">
                             <div class="col-lg-8">
-                            <h3>You</h3>
-                            <button id="deal-player1" type="button" class="btn btn-default">Deal</button>
-                            <button id="turn-player1" type="button" class="btn btn-default">End Turn</button>
+                            <h3>You
+                            <button id="turn-player1" type="button" class="btn btn-danger btn-small">End Turn</button>
+                            </h3>
                                 <div id="player1">
                                 </div>
                             </div>
@@ -147,7 +147,13 @@
 
         // Bind the card play this buttons
         $('.row').on('click', '.play-this', function(event) {
+            console.log(this.name);
             socket.emit('play', this.name);
+        });
+
+        // Bind the select card buttons
+        $('.row').on('click', '.pick-this', function(event) {
+            socket.emit('selected_card', this.name);
         });
 
         // Bind the card buy this buttons

@@ -1,5 +1,7 @@
 $(function() {
     socket = io.connect('/game');
+     
+    var turn;
 
     $('#turn-player1').hide();
 
@@ -17,12 +19,15 @@ $(function() {
 
     socket.on('turn', function(player) {
         if (player == this.socket.sessionid) {
+            turn = false;
             $('#turn-player1').hide();
-            $('.play-this').hide();
+            $('.btn').hide();
         }
         else {
-            $('#turn-player1').show();
-            $('.play-this').show();
+            turn = true;
+            $('.btn').hide(); // hide all buttons
+            $('#turn-player1').show(); // show the "end turn" button
+            $('#player1 .play-this').show(); // show the "play this card" buttons
         };
     });
 
@@ -42,6 +47,7 @@ $(function() {
         }, 10);
     };
 
+/*
     socket.on('deal_card', function(player, card_name, card_cost, card_image, card_text) {
         var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
@@ -58,7 +64,7 @@ $(function() {
             $('#player2').append(card_layout);
         };
     });
-
+*/
     socket.on('empty', function(player) {
         if (player == 'wild') {
             $('#wild').empty();
@@ -93,7 +99,7 @@ $(function() {
         var close_div = '</div>';
         var food = $('#player1-food').html();
         if (player == 'wild') {
-            if (food >= card_cost) {
+            if (food >= card_cost && turn == true) {
                 card_layout = card_layout + button + close_div;
             }
             else {
@@ -102,8 +108,6 @@ $(function() {
             $('#wild').append(card_layout);
         };
     });
-
-
 
     socket.on('render_card', function(player, card_name, card_cost, card_image, card_text, index_location) {
         var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
@@ -138,9 +142,11 @@ $(function() {
         '</div></div>';
         if (player == this.socket.sessionid) {
             $('#player1-zoo').append(card_layout);
+            $('#player1-zoo .playbutton').hide();
         }
         else {
             $('#player2-zoo').append(card_layout);
+            $('#player2-zoo .playbutton').hide();
         };
     });
 
@@ -160,6 +166,14 @@ $(function() {
         else {
             $('#player2-score').html(score);
         };
+    });
+
+    socket.on('get_card_for_zoo', function(player) {
+        $('.play-this').html('Pick This Card');
+        $('.playbutton .btn').toggleClass('play-this pick-this');
+        $('.playbutton .btn').toggleClass('btn-primary btn-warning');
+        // socket.emit('selected_card', selected_card);
+        //socket.emit('user_message', 'Card has been selected ' + selected_card);
     });
 
 });

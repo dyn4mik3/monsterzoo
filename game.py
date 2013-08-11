@@ -95,6 +95,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.log("Nicknames data: %r" % self.nicknames)
         self.room = 'default'
         self.join = 'default'
+        self.selected_card = None
+        self.card = None
 
     def recv_disconnect(self):
         user_id = self.socket.sessid
@@ -131,15 +133,25 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.logger.info("[{0}] {1}".format(self.socket.sessid, message))
 
     def on_play(self, location):
+        self.log('Received location: %s' % location)
         location = int(location)
         player_id = self.socket.sessid
         player = self.nicknames[player_id]
         card = player.hand.cards[location]
+        self.card = card
+        card.socket = self
         card.play(player)
         self.log('Trying to play card %s at index location %s' % (card, location))
         self.log("Game is %r" % self.game)
         #self.render(player_id)
-        self.render_game()
+        #self.render_game()
+
+    def on_selected_card(self, index):
+        player_id = self.socket.sessid
+        player = self.nicknames[player_id]
+        self.selected_card = index
+        self.log ('Selected Card is Now: %r' % self.selected_card)
+        self.card.play(player)
 
     def on_buy(self, location):
         location = int(location)
@@ -152,7 +164,10 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
             player.food = player.food - card.cost
             wild.hand.remove_card(card)
             player.discard.add_to_bottom(card)
-            wild.deal(1)
+            try:
+                wild.deal(1)
+            except:
+                self.log('No more cards in the wild.')
             self.render_game()
 
     def on_deal(self, player_id, num = 1):
@@ -179,8 +194,10 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
                 self.broadcast_event('render_card', player.player_id, card.name, card.cost, card.image, card.description, location);
                 location += 1
             self.broadcast_event('empty_zoo', player.player_id)
+            location = 0
             for card in zoo: # render cards in zoo
                 self.broadcast_event('render_zoo', player.player_id, card.name, card.cost, card.image, card.description, location);
+                location += 1
             self.broadcast_event('food', player.player_id, player.food)
             self.broadcast_event('score', player.player_id, player.score)
         # render wild

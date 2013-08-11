@@ -11,6 +11,44 @@ class Card(object):
     def __str__(self):
         return self.name
 
+    def discard(self, player):
+        hand = player.hand
+        discard = player.discard
+        try:
+            hand.remove_card(self)
+            discard.add_to_bottom(self)
+        except:
+            print "Card is not in hand"
+
+class Cookies(Card):
+    def __init__(self):
+        self.name = "Cookies"
+        self.description = "3 Food"
+        self.card_type = "Food"
+        self.cost = 3
+        self.food = 3
+        self.image = "/static/images/Food.png"
+    
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played Cookies"
+        self.socket.render_game()
+
+class FumbleeBoogly(Card):
+    def __init__(self):
+        self.name = "Fumblee Boogly"
+        self.description = "Draw 4 Cards. Put 2 Cards Back."
+        self.card_type = "Monster"
+        self.cost = 4
+        self.food = 0
+        self.image = "/static/images/Boogly.png"
+    
+    def play(self, player):
+        self.discard(player)
+        print "Played Dirty Socks"
+        self.socket.render_game()
+
 class DirtySocks(Card):
     def __init__(self):
         self.name = "Dirty Socks"
@@ -21,12 +59,10 @@ class DirtySocks(Card):
         self.image = "/static/images/Food.png"
     
     def play(self, player):
-        hand = player.hand
-        discard = player.discard
-        hand.remove_card(self)
-        discard.add_to_bottom(self)
-        player.food += 3
+        self.discard(player)
+        player.food += self.food
         print "Played Dirty Socks"
+        self.socket.render_game()
 
 class OoglyBoogly(Card):
     def __init__(self):
@@ -37,13 +73,10 @@ class OoglyBoogly(Card):
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
-        hand = player.hand
-        deck = player.deck
-        discard = player.discard
-        hand.remove_card(self) # remove the card from hand
+        self.discard(player)
         player.deal(3) # draw 3 cards 
-        discard.add_to_bottom(self) # move the played card to the discard
         print "Played Oogly Boogly"
+        self.socket.render_game()
 
 class ZookeeZoogly(Card):
     def __init__(self):
@@ -52,33 +85,39 @@ class ZookeeZoogly(Card):
         self.card_type = "Monster"
         self.cost = 3
         self.image = "/static/images/Zoogly.png"
+        self.socket = '' # this will hold the socketio object
     
-    """
-    def play(self, hand, discard, zoo):
-        hand.remove_card(self)
-        for card in hand.cards:
-            print card
-        discard.add_to_bottom(self)
-        selected_card = hand.cards[0]
-        hand.remove_card(selected_card) # remove the selected card from hand
-        zoo.add_to_bottom(selected_card) # put it in the zoo
-        print zoo.cards
-    """
     def play(self, player):
-        hand = player.hand
-        discard = player.discard
-        zoo = player.zoo
-        hand.remove_card(self)
-        x = 0
-        for card in hand.cards:
-            print "Index [%r] - %r" % (x, card)
-            x += 1
-        index_of_card = raw_input("> ")
-        selected_card = hand.cards[int(index_of_card)]
-        discard.add_to_bottom(self)
-        hand.remove_card(selected_card)
-        zoo.add_to_bottom(selected_card)
-        print "Played: Zookee Zoogly"
+        if self.socket.selected_card:
+            index_of_card = int(self.socket.selected_card)
+            card = player.hand.cards[index_of_card]
+            player.zoo.add_to_bottom(card)
+            self.discard(player)
+            card.discard(player)
+            '''
+            hand = player.hand
+            discard = player.discard
+            zoo = player.zoo
+            index_of_card = self.socket.selected_card
+            print int(index_of_card)
+            card = hand.cards[int(index_of_card)]
+            print card
+            hand.remove_card(self)
+            discard.add_to_bottom(self)
+            hand.remove_card(card)
+            zoo.add_to_bottom(card)
+            '''
+            self.socket.log('Played: Zookee Zoogly')
+            self.socket.render_game()
+            # reset the selected card for next time
+            self.socket.selected_card = None
+        else:
+            self.get_index_from_client(player)
+
+    def get_index_from_client(self, player):
+        self.socket.log('Getting Selected Card from Client')
+        # this sets self.socket.selected_card
+        self.socket.emit('get_card_for_zoo', player.player_id) 
 
 class Deck(object):
     def __init__(self):
@@ -155,9 +194,25 @@ class Player(object):
 
 class Wild(Player):
     def __init__(self, player_id='wild'):
-        starter_deck = [OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly(),OoglyBoogly()]
+        starter_deck = [
+                OoglyBoogly(),
+                OoglyBoogly(),
+                OoglyBoogly(),
+                OoglyBoogly(),
+                OoglyBoogly(),
+                OoglyBoogly(),
+                OoglyBoogly(),
+                OoglyBoogly(),
+                OoglyBoogly(),
+                OoglyBoogly(),
+                Cookies(),
+                Cookies(),
+                FumbleeBoogly(),
+                FumbleeBoogly()
+            ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
+        self.deck.shuffle_cards()
         self.hand = Hand()
         self.discard = Deck()
         self.player_id = player_id
