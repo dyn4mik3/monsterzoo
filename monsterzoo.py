@@ -91,9 +91,9 @@ class ZookeeZoogly(Card):
         if self.socket.selected_card:
             index_of_card = int(self.socket.selected_card)
             card = player.hand.cards[index_of_card]
+            player.hand.remove_card(card)
             player.zoo.add_to_bottom(card)
             self.discard(player)
-            card.discard(player)
             '''
             hand = player.hand
             discard = player.discard
@@ -219,8 +219,7 @@ class Wild(Player):
 
 class Game(object):
     def __init__(self, players):
-        #self.num_of_players = num_of_players
-
+        self.state = 'play'
         self.players = players
         self.num_of_players = len(players)
         self.wild = Wild()
@@ -357,6 +356,9 @@ class Game(object):
                 if card.cost:
                     score += card.cost
             player.score = score
+            if player.score >= 20:
+                self.state = 'end'
+                print 'Game Over'
             print "Player %r Score: %r" % (player, player.score)
 
     def play_game(self):

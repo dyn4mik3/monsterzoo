@@ -209,6 +209,13 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.broadcast_event('announcement', 'Wild has the following cards: %r' % self.game.wild.hand.cards)
             self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location);
             location += 1
+        if self.game.state == 'end':
+            score_dictionary = {}
+            for player in self.game.players:
+                score_dictionary[player.player_id] = player.score
+            winner = max(score_dictionary, key=score_dictionary.get)
+            self.broadcast_event('game_over', winner)
+            self.log('Game over. Winner is %r' % winner)
 
     def render(self, player_id):
         player = self.nicknames[player_id]
@@ -268,6 +275,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.game.setup_next_turn(player)
         self.render_game()
         self.broadcast_event('turn', self.socket.sessid)
+
 
     def on_user_message(self, msg):
         self.log('User message: {0}'.format(msg))

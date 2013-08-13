@@ -3,11 +3,7 @@
 	<head>
         <meta charset="utf-8">
         <title>{% block title %}{% endblock title %} Monster Zoo</title>
-        <script src="/static/js/jquery.min.js"></script>
-        <script src="/static/js/socketio/socket.io.min.js"></script>
-        <script src="/static/js/game.js"></script>
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css">
-        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/js/bootstrap.min.js"></script>
         <link rel="stylesheet" href="/static/css/chat.css">
 
 	</head>
@@ -38,6 +34,7 @@
                         {% endif %}
                     {% endwith %}
                 </div>
+        <script src="/static/js/jquery.min.js"></script>
                 {% block content %} {% endblock content %}
             </div>
         </div>
@@ -46,5 +43,8 @@
                 <p class="text-muted credit">Monster Zoo is part of the Ruby Cow Games Family</p>
             </div>
         </div>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/js/bootstrap.min.js"></script>
+        <script src="/static/js/socketio/socket.io.min.js"></script>
+        <script src="/static/js/game.js"></script>
 	</body>
 </html>

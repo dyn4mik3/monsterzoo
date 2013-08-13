@@ -12,6 +12,17 @@ $(function() {
     socket.on('game_start', function (players) {
         $('#game').append($('<p>Game start</p>'));
     });
+    
+    socket.on('game_over', function(player) {
+        if (player == this.socket.sessionid) {
+            $('.play-this').hide();
+            $('#win-message').modal('toggle');
+        }
+        else {
+            $('.play-this').hide();
+            $('#lose-message').modal('toggle');
+        };
+    });
 
     socket.on('player_number', function (game_update) {
         $('#game').append(game_update);
@@ -30,6 +41,17 @@ $(function() {
             $('#player1 .play-this').show(); // show the "play this card" buttons
         };
     });
+
+    function clear_buttons() {
+        if (turn == true) {
+            $('.btn').hide();
+            $('#turn-player1').show();
+            $('#player1 .play-this').show();
+        }
+        else if (turn == false) {
+            $('.btn').hide();
+        };
+    };
 
     socket.on('announcement', function (msg) {
         $('#lines').append($('<p>').append($('<em>').text(msg)));
@@ -128,6 +150,7 @@ $(function() {
         else {
             $('#player2').append(card_layout);
         };
+        clear_buttons();
     });
 
     socket.on('render_zoo', function(player, card_name, card_cost, card_image, card_text, index_location) {

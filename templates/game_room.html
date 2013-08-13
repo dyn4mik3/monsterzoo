@@ -1,33 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
+                <!-- Modal -->
+                <div class="modal fade" id="win-message">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>GAME OVER</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>You win! Great job.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div> <!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /modal -->
+                <!-- Modal -->
+                <div class="modal fade" id="lose-message">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>GAME OVER</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>You lost! Better luck next time.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div> <!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /modal -->
                 <div id="main">
                         <h2>Game Area</h2>
                         <div class="row">
                             <div class="col-lg-8">
                                 <h3>Opponent</h3>
+                                <!-- Area for Player 2 Content -->
                                 <div id="player2">
-                                    <!-- CARD TEMPLATE 
-                                    <div class="card">
-                                        <div class="corner top_left">
-                                            <span class="number">Oogly Oogly</span>
-                                        </div>
-                                        <div class="corner top_right">
-                                            <span class="number">4</span>
-                                        </div>
-                                        <div class="card_image">
-                                            <p><img src="/static/images/Oogly.png" height="120px"></p>
-                                            Draw 3 Cards. Something else. Something else. Something else.
-                                        </div>
-                                        <div class="playbutton">
-                                            <button type="button" class="btn btn-primary btn-mini">Play This Card</button>
-                                        </div>
-                                    </div>
-                                    <div class="clearfix"></div>
-                                    <div class="playbutton">
-                                        <button type="button" class="btn btn-primary btn-mini">Play This Card</button>
-                                    </div>
-                                    -->
                                 </div>
                             </div>
                             <div class="col-lg-3">
@@ -47,6 +59,7 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <h3>The Wild</h3>
+                                <!-- Area for The Wild Content -->
                                 <div id="wild">
                                 </div>
                             </div>
@@ -56,6 +69,7 @@
                             <h3>You
                             <button id="turn-player1" type="button" class="btn btn-danger btn-small">End Turn</button>
                             </h3>
+                                <!-- Area for Player 1 Content -->
                                 <div id="player1">
                                 </div>
                             </div>
