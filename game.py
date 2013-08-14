@@ -96,6 +96,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.room = 'default'
         self.join = 'default'
         self.selected_card = None
+        self.selected_cards = []
         self.card = None
 
     def recv_disconnect(self):
@@ -150,6 +151,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         player_id = self.socket.sessid
         player = self.nicknames[player_id]
         self.selected_card = index
+        card = player.hand.cards[int(index)] # get card object from the index number
+        self.selected_cards.append(card) # add cards to the list of selected cards
         self.log ('Selected Card is Now: %r' % self.selected_card)
         self.card.play(player)
 

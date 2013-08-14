@@ -20,6 +20,26 @@ class Card(object):
         except:
             print "Card is not in hand"
 
+    def put_back(self, player):
+        hand = player.hand
+        deck = player.deck
+        try:
+            hand.remove_card(self)
+            deck.add_to_top(self)
+        except:
+            print "Card is not in hand"
+
+    def select_cards(self, num, player, played_card_index):
+        self.socket.log('Getting Selected Card from Client')
+        self.socket.log('Data passed to select_cards %r %r %r' % (num, player, played_card_index))
+        self.socket.emit('select_cards', player.player_id, played_card_index) 
+        self.socket.log('Sent emit selected_cards')
+
+    def get_selected_card(self):
+        selected_cards = self.socket.selected_cards
+        card = selected_cards.pop(0)
+        return card
+
 class Cookies(Card):
     def __init__(self):
         self.name = "Cookies"
@@ -45,9 +65,27 @@ class FumbleeBoogly(Card):
         self.image = "/static/images/Boogly.png"
     
     def play(self, player):
-        self.discard(player)
-        print "Played Dirty Socks"
-        self.socket.render_game()
+        if len(self.socket.selected_cards) == 2:
+            card = self.socket.selected_cards[1]
+            card.put_back(player) # put the second card back on deck
+            self.discard(player) # discard the fumblee boogly card
+            self.socket.log('Played: Fumblee Boogly')
+            self.socket.render_game()
+            self.socket.selected_cards = [] # reset the selected cards
+        elif len(self.socket.selected_cards) == 1:
+            self.socket.log('Discard first card')
+            card = self.socket.selected_cards[0]
+            card.put_back(player) # put the first card back on deck
+            self.socket.render_game()
+            self.socket.log('Grab another card')
+            fumblee = player.hand.cards.index(self)
+            self.select_cards(1, player, fumblee)
+        else:
+            player.deal(4)
+            self.socket.render_game()
+            self.socket.log('Going to select_cards function')
+            fumblee = player.hand.cards.index(self)
+            self.select_cards(1, player, fumblee)
 
 class DirtySocks(Card):
     def __init__(self):
@@ -88,37 +126,32 @@ class ZookeeZoogly(Card):
         self.socket = '' # this will hold the socketio object
     
     def play(self, player):
+        self.socket.log('Play')
+        if self.socket.selected_cards:
+            card = self.get_selected_card()
+            player.hand.remove_card(card)
+            player.zoo.add_to_bottom(card)
+            self.discard(player)
+            self.socket.log('Played: Zookee Zoogly')
+            self.socket.render_game()
+            self.socket.selected_cards = [] # reset the selected cards
+        else:
+            self.socket.log('Going to select_cards function')
+            zookee = player.hand.cards.index(self)
+            self.select_cards(1, player, zookee)
+
+        '''
         if self.socket.selected_card:
             index_of_card = int(self.socket.selected_card)
             card = player.hand.cards[index_of_card]
             player.hand.remove_card(card)
             player.zoo.add_to_bottom(card)
             self.discard(player)
-            '''
-            hand = player.hand
-            discard = player.discard
-            zoo = player.zoo
-            index_of_card = self.socket.selected_card
-            print int(index_of_card)
-            card = hand.cards[int(index_of_card)]
-            print card
-            hand.remove_card(self)
-            discard.add_to_bottom(self)
-            hand.remove_card(card)
-            zoo.add_to_bottom(card)
-            '''
             self.socket.log('Played: Zookee Zoogly')
             self.socket.render_game()
             # reset the selected card for next time
             self.socket.selected_card = None
-        else:
-            self.get_index_from_client(player)
-
-    def get_index_from_client(self, player):
-        self.socket.log('Getting Selected Card from Client')
-        # this sets self.socket.selected_card
-        self.socket.emit('get_card_for_zoo', player.player_id) 
-
+        '''
 class Deck(object):
     def __init__(self):
         self.cards = []

@@ -79,6 +79,22 @@ code {
     z-index: 2; 
 }
 
+.cardback { 
+    background-color: light-blue; 
+    -moz-border-radius: 10px; 
+    -webkit-border-radius: 10px; 
+    border-radius: 10px; 
+    -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
+    -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
+    float: left; 
+    height: 280px; 
+    margin: 0 8px 8px 0; 
+    position: relative; 
+    width: 120px; 
+    z-index: 2; 
+}
+
 .card .top_right {
     color:orange;
     position:absolute;
