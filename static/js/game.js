@@ -16,6 +16,7 @@ $(function() {
     socket.on('game_over', function(player) {
         if (player == this.socket.sessionid) {
             $('.play-this').hide();
+            $('#turn-player1').hide();
             $('#win-message').modal('toggle');
         }
         else {
@@ -171,11 +172,11 @@ $(function() {
         '</div></div>';
         if (player == this.socket.sessionid) {
             $('#player1-zoo').append(card_layout);
-            $('#player1-zoo .playbutton').hide();
+            $('#player1-zoo .playbutton .btn').hide();
         }
         else {
             $('#player2-zoo').append(card_layout);
-            $('#player2-zoo .playbutton').hide();
+            $('#player2-zoo .playbutton .btn').hide();
         };
     });
 
@@ -198,10 +199,22 @@ $(function() {
     });
 
     socket.on('select_cards', function(player, card_index) {
+        $('#player1 .playbutton .btn').show();
         $('#player1 .play-this').html('Pick This Card');
         $('#player1 .playbutton .btn').toggleClass('play-this pick-this');
         $('#player1 .playbutton .btn').toggleClass('btn-primary btn-warning');
         $('#player1 .playbutton [name="'+ card_index +'"]').hide();
+        // socket.emit('selected_card', selected_card);
+        //socket.emit('user_message', 'Card has been selected ' + selected_card);
+    });
+
+    socket.on('select_card_from_zoo', function(player, card_index) {
+        $('#player1 .playbutton .btn').hide();
+        $('#player1-zoo .play-this').html('Pick This Card');
+        $('#player1-zoo .playbutton .btn').show();
+        $('#player1-zoo .playbutton .btn').toggleClass('play-this pick-this');
+        $('#player1-zoo .playbutton .btn').toggleClass('btn-primary btn-warning');
+        // $('#player1-zoo .playbutton [name="'+ card_index +'"]').hide();
         // socket.emit('selected_card', selected_card);
         //socket.emit('user_message', 'Card has been selected ' + selected_card);
     });

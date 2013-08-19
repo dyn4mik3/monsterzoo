@@ -35,10 +35,37 @@ class Card(object):
         self.socket.emit('select_cards', player.player_id, played_card_index) 
         self.socket.log('Sent emit selected_cards')
 
+    def select_card_from_zoo(self, player, played_card_index):
+        self.socket.emit('select_card_from_zoo', player.player_id, played_card_index)
+
     def get_selected_card(self):
         selected_cards = self.socket.selected_cards
         card = selected_cards.pop(0)
         return card
+
+    def peak_at_play_stack(self):
+        try:
+            card = self.socket.play_stack[-1]
+            print "Card at the top of the stack is %r" % card
+            return card
+        except:
+            print "Peaking at Play Stack: Play Stack is Empty"
+            return False
+
+class DirtySocks(Card):
+    def __init__(self):
+        self.name = "Dirty Socks"
+        self.description = "1 Food"
+        self.card_type = "Food"
+        self.cost = 0
+        self.food = 1
+        self.image = "/static/images/Food.png"
+    
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played Dirty Socks"
+        self.socket.render_game()
 
 class Cookies(Card):
     def __init__(self):
@@ -87,20 +114,45 @@ class FumbleeBoogly(Card):
             fumblee = player.hand.cards.index(self)
             self.select_cards(1, player, fumblee)
 
-class DirtySocks(Card):
+class BooBoogly(Card):
     def __init__(self):
-        self.name = "Dirty Socks"
-        self.description = "1 Food"
-        self.card_type = "Food"
-        self.cost = 0
-        self.food = 1
-        self.image = "/static/images/Food.png"
+        self.name = 'Boo Boogly'
+        self.description = 'Draw 3 Cards'
+        self.card_type = "Monster"
+        self.cost = 3
+        self.image = "/static/images/Boogly.png"
     
     def play(self, player):
         self.discard(player)
-        player.food += self.food
-        print "Played Dirty Socks"
+        player.deal(3) # draw 3 cards 
+        print "Played Boo Boogly"
         self.socket.render_game()
+
+class MeeraBoogly(Card):
+    def __init__(self):
+        self.name = 'Meera Boogly'
+        self.description = 'Play a card from any Zoo'
+        self.card_type = "Monster"
+        self.cost = 3
+        self.image = "/static/images/Boogly.png"
+
+    def play(self, player):
+        if self.socket.selected_cards:
+            card = self.get_selected_card()
+            self.socket.selected_cards = [] # reset the selected cards
+            print card
+            card.play(player)
+            self.play(player)
+        elif self.peak_at_play_stack() == self:
+            self.discard(player)
+            print "Played Meera Boogly"
+            self.socket.render_game()
+            self.socket.play_stack.remove(self)
+        else:
+            meera = player.hand.cards.index(self)
+            self.select_card_from_zoo(player, meera)
+            self.socket.play_stack.append(self)
+            print "Meera: Play stack is %r" % self.socket.play_stack
 
 class OoglyBoogly(Card):
     def __init__(self):
@@ -133,12 +185,19 @@ class ZookeeZoogly(Card):
             player.zoo.add_to_bottom(card)
             self.discard(player)
             self.socket.log('Played: Zookee Zoogly')
-            self.socket.render_game()
             self.socket.selected_cards = [] # reset the selected cards
+            self.socket.render_game()
+            self.socket.play_stack.remove(self)
         else:
             self.socket.log('Going to select_cards function')
-            zookee = player.hand.cards.index(self)
-            self.select_cards(1, player, zookee)
+            try:
+                zookee = player.hand.cards.index(self)
+            except:
+                zookee = None
+                print "Zookee is not in hand."
+            self.select_cards(1, player, zookee) # issue with meera boogly, if this is run then meera is played before card can be selected
+            self.socket.play_stack.append(self)
+            print "Zookee: Play stack is %r" % self.socket.play_stack
 
         '''
         if self.socket.selected_card:
@@ -228,14 +287,10 @@ class Player(object):
 class Wild(Player):
     def __init__(self, player_id='wild'):
         starter_deck = [
-                OoglyBoogly(),
-                OoglyBoogly(),
-                OoglyBoogly(),
-                OoglyBoogly(),
-                OoglyBoogly(),
-                OoglyBoogly(),
-                OoglyBoogly(),
-                OoglyBoogly(),
+                BooBoogly(),
+                BooBoogly(),
+                MeeraBoogly(),
+                MeeraBoogly(),
                 OoglyBoogly(),
                 OoglyBoogly(),
                 Cookies(),

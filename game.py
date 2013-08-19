@@ -97,6 +97,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.join = 'default'
         self.selected_card = None
         self.selected_cards = []
+        self.play_stack = []
         self.card = None
 
     def recv_disconnect(self):
@@ -153,7 +154,18 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.selected_card = index
         card = player.hand.cards[int(index)] # get card object from the index number
         self.selected_cards.append(card) # add cards to the list of selected cards
-        self.log ('Selected Card is Now: %r' % self.selected_card)
+        self.log ('Selected Card is Now: %r %r' % (card, self.selected_card))
+        self.card.play(player)
+    
+    def on_selected_card_from_zoo(self, index):
+        player_id = self.socket.sessid
+        player = self.nicknames[player_id]
+        self.selected_card = index
+        card = player.zoo.cards[int(index)] # get card object from the index number
+        card.socket = self
+        self.selected_cards.append(card) # add cards to the list of selected cards
+        self.log ('Selected Card from Zoo is Now: %r %r' % (card, self.selected_card))
+        self.log ('Playing card from self.card %r' % self.card)
         self.card.play(player)
 
     def on_buy(self, location):
@@ -208,7 +220,6 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         location = 0
         self.broadcast_event('empty', 'wild')
         for card in cards:
-            self.log('Wild requested a card. {%r}' % card)
             self.broadcast_event('announcement', 'Wild has the following cards: %r' % self.game.wild.hand.cards)
             self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location);
             location += 1

@@ -160,14 +160,19 @@
         });
 
         // Bind the card play this buttons
-        $('.row').on('click', '.play-this', function(event) {
+        $('.row').on('click', '#player1 .play-this', function(event) {
             console.log(this.name);
             socket.emit('play', this.name);
         });
 
         // Bind the select card buttons
-        $('.row').on('click', '.pick-this', function(event) {
+        $('.row').on('click', '#player1 .pick-this', function(event) {
             socket.emit('selected_card', this.name);
+        });
+
+        // Bind the select card zoo buttons
+        $('.row').on('click', '#player1-zoo .pick-this', function(event) {
+            socket.emit('selected_card_from_zoo', this.name);
         });
 
         // Bind the card buy this buttons
