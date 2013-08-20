@@ -15,6 +15,7 @@ class Card(object):
         hand = player.hand
         discard = player.discard
         try:
+            print "Trying to remove card %r from hand" % self
             hand.remove_card(self)
             discard.add_to_bottom(self)
         except:
@@ -35,6 +36,26 @@ class Card(object):
         self.socket.emit('select_cards', player.player_id, played_card_index) 
         self.socket.log('Sent emit selected_cards')
 
+    def find_location(self, player):
+        hand = player.hand
+        deck = player.deck
+        zoo = player.zoo
+        if self in hand:
+            location = hand.index(self)
+            print "Card found in Hand"
+            return 'hand', location
+        elif self in deck:
+            location = deck.index(self)
+            print "Card found in Deck"
+            return 'deck', location
+        elif self in zoo:
+            location = zoo.index(self)
+            print "Card found in Zoo"
+            return 'zoo', location
+        else:
+            print "Card not found"
+            return False
+
     def select_card_from_zoo(self, player, played_card_index):
         self.socket.emit('select_card_from_zoo', player.player_id, played_card_index)
 
@@ -50,6 +71,15 @@ class Card(object):
             return card
         except:
             print "Peaking at Play Stack: Play Stack is Empty"
+            return False
+
+    def is_in_stack(self):
+        try:
+            card = self.socket.play_stack.index(self)
+            print "Card %r is in stack at location" % card
+            return True
+        except:
+            print "Card is not in the play stack"
             return False
 
 class DirtySocks(Card):
@@ -105,7 +135,11 @@ class FumbleeBoogly(Card):
             card.put_back(player) # put the first card back on deck
             self.socket.render_game()
             self.socket.log('Grab another card')
-            fumblee = player.hand.cards.index(self)
+            try:
+                fumblee = player.hand.cards.index(self)
+            except:
+                fumblee = None
+                print "Fumblee is not in Hand"
             self.select_cards(1, player, fumblee)
         else:
             player.deal(4)
@@ -137,17 +171,30 @@ class MeeraBoogly(Card):
         self.image = "/static/images/Boogly.png"
 
     def play(self, player):
-        if self.socket.selected_cards:
+        if self.socket.selected_cards and self.peak_at_play_stack() == self:
+            # Meera is the top card in the stack and a selected card exists
             card = self.get_selected_card()
             self.socket.selected_cards = [] # reset the selected cards
-            print card
+            print "Meera Loop: Playing %r" % card
+            card.play(player)
+            self.play(player)
+        elif self.socket.selected_cards and self.peak_at_play_stack() != self:
+            # Meera is not the top card, but there is already a selected card.
+            # Pass it back to the top card in the stack.
+            card = self.peak_at_play_stack()
+            print "Meera Loop: Selected Card Exists & Meera is not top of stack"
+            print "Try playing the top card on stack"
             card.play(player)
             self.play(player)
         elif self.peak_at_play_stack() == self:
+            print "Meera Loop: Meera is the top card in stack"
             self.discard(player)
             print "Played Meera Boogly"
             self.socket.render_game()
             self.socket.play_stack.remove(self)
+        elif self.is_in_stack():
+            print "Meera is in the stack, but not at the top"
+            pass
         else:
             meera = player.hand.cards.index(self)
             self.select_card_from_zoo(player, meera)
@@ -178,7 +225,7 @@ class ZookeeZoogly(Card):
         self.socket = '' # this will hold the socketio object
     
     def play(self, player):
-        self.socket.log('Play')
+        self.socket.log('In the Play Loop for Zookee Zoogly')
         if self.socket.selected_cards:
             card = self.get_selected_card()
             player.hand.remove_card(card)

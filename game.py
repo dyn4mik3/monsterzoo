@@ -153,8 +153,10 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         player = self.nicknames[player_id]
         self.selected_card = index
         card = player.hand.cards[int(index)] # get card object from the index number
+        card.socket = self
         self.selected_cards.append(card) # add cards to the list of selected cards
-        self.log ('Selected Card is Now: %r %r' % (card, self.selected_card))
+        self.log('Selected Card is Now: %r %r' % (card, self.selected_card))
+        self.log('Trying to play: %r' % self.card)
         self.card.play(player)
     
     def on_selected_card_from_zoo(self, index):
@@ -287,6 +289,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         user_id = self.socket.sessid
         player = self.nicknames[user_id]
         self.game.setup_next_turn(player)
+        self.play_stack = [] # rest play stack
         self.render_game()
         self.broadcast_event('turn', self.socket.sessid)
 

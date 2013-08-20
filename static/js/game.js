@@ -203,7 +203,9 @@ $(function() {
         $('#player1 .play-this').html('Pick This Card');
         $('#player1 .playbutton .btn').toggleClass('play-this pick-this');
         $('#player1 .playbutton .btn').toggleClass('btn-primary btn-warning');
-        $('#player1 .playbutton [name="'+ card_index +'"]').hide();
+        if (card_index != null) {
+            $('#player1 .playbutton [name="'+ card_index +'"]').hide();
+        };
         // socket.emit('selected_card', selected_card);
         //socket.emit('user_message', 'Card has been selected ' + selected_card);
     });

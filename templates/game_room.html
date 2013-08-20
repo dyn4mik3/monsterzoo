@@ -162,16 +162,19 @@
         // Bind the card play this buttons
         $('.row').on('click', '#player1 .play-this', function(event) {
             console.log(this.name);
+            console.log("Clicked on a play this button.");
             socket.emit('play', this.name);
         });
 
         // Bind the select card buttons
         $('.row').on('click', '#player1 .pick-this', function(event) {
+            console.log("Clicked on a pick this button.");
             socket.emit('selected_card', this.name);
         });
 
         // Bind the select card zoo buttons
         $('.row').on('click', '#player1-zoo .pick-this', function(event) {
+            console.log("Clicked on a pick this button in the Zoo.");
             socket.emit('selected_card_from_zoo', this.name);
         });
 
