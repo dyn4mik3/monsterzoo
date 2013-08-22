@@ -12,6 +12,8 @@ This is a beta playtest version of Monster Zoo Online, the web based version of 
 
 Currently only works for 2 players. Not all cards have been programmed into the game.
 
+The game was built in Python 2.7.
+
 HOW TO LAUNCH
 -------------
 
