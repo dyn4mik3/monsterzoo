@@ -165,7 +165,7 @@ class BooBoogly(Card):
 class MeeraBoogly(Card):
     def __init__(self):
         self.name = 'Meera Boogly'
-        self.description = 'Play a card from any Zoo'
+        self.description = 'Play a card from your Zoo'
         self.card_type = "Monster"
         self.cost = 3
         self.image = "/static/images/Boogly.png"

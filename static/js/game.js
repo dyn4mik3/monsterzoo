@@ -199,6 +199,7 @@ $(function() {
     });
 
     socket.on('select_cards', function(player, card_index) {
+        $('#player1-zoo .playbutton .btn').hide();
         $('#player1 .playbutton .btn').show();
         $('#player1 .play-this').html('Pick This Card');
         $('#player1 .playbutton .btn').toggleClass('play-this pick-this');
