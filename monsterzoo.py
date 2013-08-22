@@ -1,10 +1,11 @@
 import random
 
 class Card(object):
-    def __init__(self, name="", description="", card_type="", cost=0, food=0, image=""):
+    def __init__(self, name="", description="", card_type="", card_family="",cost=0, food=0, image=""):
         self.name = name
         self.description = description
         self.card_type = card_type
+        self.card_family = card_family
         self.cost = cost
         self.food = food
     
@@ -87,6 +88,7 @@ class DirtySocks(Card):
         self.name = "Dirty Socks"
         self.description = "1 Food"
         self.card_type = "Food"
+        self.card_family = "Food"
         self.cost = 0
         self.food = 1
         self.image = "/static/images/Food.png"
@@ -102,6 +104,7 @@ class Cookies(Card):
         self.name = "Cookies"
         self.description = "3 Food"
         self.card_type = "Food"
+        self.card_family = "Food"
         self.cost = 3
         self.food = 3
         self.image = "/static/images/Food.png"
@@ -117,6 +120,7 @@ class FumbleeBoogly(Card):
         self.name = "Fumblee Boogly"
         self.description = "Draw 4 Cards. Put 2 Cards Back."
         self.card_type = "Monster"
+        self.card_family = "Boogly"
         self.cost = 4
         self.food = 0
         self.image = "/static/images/Boogly.png"
@@ -153,6 +157,7 @@ class BooBoogly(Card):
         self.name = 'Boo Boogly'
         self.description = 'Draw 3 Cards'
         self.card_type = "Monster"
+        self.card_family = "Boogly"
         self.cost = 3
         self.image = "/static/images/Boogly.png"
     
@@ -167,6 +172,7 @@ class MeeraBoogly(Card):
         self.name = 'Meera Boogly'
         self.description = 'Play a card from your Zoo'
         self.card_type = "Monster"
+        self.card_family = "Boogly"
         self.cost = 3
         self.image = "/static/images/Boogly.png"
 
@@ -201,11 +207,51 @@ class MeeraBoogly(Card):
             self.socket.play_stack.append(self)
             print "Meera: Play stack is %r" % self.socket.play_stack
 
+class WhompoBoogly(Card):
+    def __init__(self):
+        self.name = 'Whompo Boogly'
+        self.description = '+2 Food. Zoo Effect: Draw a card.'
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 4
+        self.food = 2
+        self.image = "/static/images/Boogly.png"
+    
+    def play(self, player):
+        self.discard(player)
+        player.food += 2 
+        print "Played Whompo Boogly"
+        self.socket.render_game()
+
+class BoomerBoogly(Card):
+    def __init__(self):
+        self.name = 'Boomer Boogly'
+        self.description = 'Draw 2 Cards for Every Boogly in Your Zoo'
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 6
+        self.image = "/static/images/Boogly.png"
+    
+    def play(self, player):
+        self.discard(player)
+        count = 0
+        for card in player.zoo.cards:
+            if card.card_family == "Boogly":
+                count += 1
+        if count > 0:
+            count = count * 2
+            player.deal(count)
+        else:
+            print "No Boogly in Zoo"
+        print "Played Whompo Boogly"
+        self.socket.render_game()
+
 class OoglyBoogly(Card):
     def __init__(self):
         self.name = 'Oogly Boogly'
         self.description = 'Draw 3 Cards'
         self.card_type = "Monster"
+        self.card_family = "Boogly"
         self.cost = 3
         self.image = "/static/images/Oogly.png"
     
@@ -220,6 +266,7 @@ class ZookeeZoogly(Card):
         self.name = 'Zookee Zoogly'
         self.description = 'Move a Monster to your Zoo'
         self.card_type = "Monster"
+        self.card_family = "Zoogly"
         self.cost = 3
         self.image = "/static/images/Zoogly.png"
         self.socket = '' # this will hold the socketio object
@@ -343,7 +390,11 @@ class Wild(Player):
                 Cookies(),
                 Cookies(),
                 FumbleeBoogly(),
-                FumbleeBoogly()
+                FumbleeBoogly(),
+                WhompoBoogly(),
+                WhompoBoogly(),
+                BoomerBoogly(),
+                BoomerBoogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
