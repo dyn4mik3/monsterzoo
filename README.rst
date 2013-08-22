@@ -10,6 +10,8 @@ BETA PLAYTEST NOTE
 
 This is a beta playtest version of Monster Zoo Online, the web based version of the card game.
 
+Currently only works for 2 players. Not all cards have been programmed into the game.
+
 HOW TO LAUNCH
 -------------
 
