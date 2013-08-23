@@ -97,6 +97,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.join = 'default'
         self.selected_card = None
         self.selected_cards = []
+        self.selected_cards_wild = []
         self.play_stack = []
         self.card = None
 
@@ -157,6 +158,14 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.selected_cards.append(card) # add cards to the list of selected cards
         self.log('Selected Card is Now: %r %r' % (card, self.selected_card))
         self.log('Trying to play: %r' % self.card)
+        self.card.play(player)
+
+    def on_selected_card_from_wild(self, index):
+        player_id = self.socket.sessid
+        player = self.nicknames[player_id]
+        card = self.game.wild.hand.cards[int(index)]
+        card.socket = self
+        self.selected_cards_wild.append(card)
         self.card.play(player)
     
     def on_selected_card_from_zoo(self, index):

@@ -34,8 +34,17 @@ class Card(object):
     def select_cards(self, num, player, played_card_index):
         self.socket.log('Getting Selected Card from Client')
         self.socket.log('Data passed to select_cards %r %r %r' % (num, player, played_card_index))
-        self.socket.emit('select_cards', player.player_id, played_card_index) 
+        card_index = [int(played_card_index)]
+        # ADD FOOD TO CARD INDEX
+        for card in player.hand.cards:
+            if card.card_type == "Food":
+                card_index.append(player.hand.cards.index(card))
+        print "Card index for selected_cards %r" % card_index
+        self.socket.emit('select_cards', player.player_id, card_index) 
         self.socket.log('Sent emit selected_cards')
+
+    def select_cards_wild(self, num, player):
+        self.socket.emit('select_card_from_wild', player.player_id)
 
     def get_other_player(self, player):
         player_index = self.socket.players.index(player)
@@ -69,8 +78,16 @@ class Card(object):
     def select_card_from_zoo(self, player, played_card_index):
         self.socket.emit('select_card_from_zoo', player.player_id, played_card_index)
 
+    def select_card_from_wild(self, player):
+        self.socket.emit('select_card_from_wild', player.player_id)
+
     def get_selected_card(self):
         selected_cards = self.socket.selected_cards
+        card = selected_cards.pop(0)
+        return card
+
+    def get_selected_card_wild(self):
+        selected_cards = self.socket.selected_cards_wild
         card = selected_cards.pop(0)
         return card
 
@@ -332,6 +349,48 @@ class LurtiBoogly(Card):
         self.discard(player)
         self.socket.render_game()
 
+class PortaBoogly(Card):
+    def __init__(self):
+        self.name = 'Porta Boogly'
+        self.description = "Swap a Monster card from your hand with a card in The Wild."
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 3
+        self.image = "/static/images/Boogly.png"
+    
+    def play(self, player):
+        self.socket.log('In the Play Loop for Porta Boogly')
+        # First select a card from hand
+        # Then select a card in the wild
+        # Then move the wild card into hand
+        if self.socket.selected_cards and self.socket.selected_cards_wild:
+            card = self.get_selected_card()
+            wildcard = self.get_selected_card_wild()
+            wild = self.socket.game.wild
+            # swap card in wild and hand
+            player.hand.remove_card(card)
+            wild.hand.add_to_bottom(card)
+            wild.hand.remove_card(wildcard)
+            player.hand.add_to_bottom(wildcard)
+            self.discard(player)
+            self.socket.log('Played: Porta Boogly')
+            self.socket.selected_cards = [] # reset the selected cards
+            self.socket.selected_cards_wild = [] # reset the selected cards from wild
+            self.socket.render_game()
+            self.socket.play_stack.remove(self)
+        elif self.socket.selected_cards and not self.socket.selected_cards_wild:
+            self.socket.log('Going to select_cards_wild function')
+            self.select_cards_wild(1, player)
+        else:
+            self.socket.log('Going to select_cards function')
+            try:
+                porta = player.hand.cards.index(self)
+            except:
+                porta = None
+                print "Porta is not in hand."
+            self.select_cards(1, player, porta) # issue with meera boogly, if this is run then meera is played before card can be selected
+            self.socket.play_stack.append(self)
+            print "Porta: Play stack is %r" % self.socket.play_stack
 
 class OoglyBoogly(Card):
     def __init__(self):
@@ -380,18 +439,6 @@ class ZookeeZoogly(Card):
             self.socket.play_stack.append(self)
             print "Zookee: Play stack is %r" % self.socket.play_stack
 
-        '''
-        if self.socket.selected_card:
-            index_of_card = int(self.socket.selected_card)
-            card = player.hand.cards[index_of_card]
-            player.hand.remove_card(card)
-            player.zoo.add_to_bottom(card)
-            self.discard(player)
-            self.socket.log('Played: Zookee Zoogly')
-            self.socket.render_game()
-            # reset the selected card for next time
-            self.socket.selected_card = None
-        '''
 class Deck(object):
     def __init__(self):
         self.cards = []
@@ -440,7 +487,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [PortaBoogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -495,7 +542,9 @@ class Wild(Player):
                 LanzoBoogly(),
                 LanzoBoogly(),
                 LurtiBoogly(),
-                LurtiBoogly()
+                LurtiBoogly(),
+                PortaBoogly(),
+                PortaBoogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
@@ -604,6 +653,8 @@ class Game(object):
             self.turn(player)
     
     def setup_next_turn(self, player):
+        print "Setting food to zero"
+        player.food = 0
         count_of_cards = len(player.hand.cards)
         print "Setting up next turn for Player %r" % player
         print "Player has %r cards" % count_of_cards

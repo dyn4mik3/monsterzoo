@@ -110,16 +110,14 @@ $(function() {
     });
 
     socket.on('render_wild', function(player, card_name, card_cost, card_image, card_text, index_location) {
-        var button = '<div class="playbutton">' +
-        '<button type="button" ' +
-        'name="' + index_location + '" class="btn btn-primary btn-mini buy-this">Buy This Card</button>' +
-        '</div>';
+        var button = '<button type="button" ' + 'id="wild' + index_location +'" ' +
+        'name="' + index_location + '" class="btn btn-primary btn-mini buy-this">Buy This Card</button>';
         var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
         '" height="80px"></p>' + card_text +
-        '</div>'; 
-        var close_div = '</div>';
+        '</div><div class="playbutton">'; 
+        var close_div = '</div></div>';
         var food = $('#player1-food').html();
         if (player == 'wild') {
             if (food >= card_cost && turn == true) {
@@ -205,7 +203,9 @@ $(function() {
         $('#player1 .playbutton .btn').toggleClass('play-this pick-this');
         $('#player1 .playbutton .btn').toggleClass('btn-primary btn-warning');
         if (card_index != null) {
-            $('#player1 .playbutton [name="'+ card_index +'"]').hide();
+            for (var i=0; i < card_index.length; i++) {
+            $('#player1 .playbutton [name="'+ card_index[i] +'"]').hide();
+            };
         };
         // socket.emit('selected_card', selected_card);
         //socket.emit('user_message', 'Card has been selected ' + selected_card);
@@ -221,5 +221,17 @@ $(function() {
         // socket.emit('selected_card', selected_card);
         //socket.emit('user_message', 'Card has been selected ' + selected_card);
     });
+
+    socket.on('select_card_from_wild', function(player, card_index) {
+        $('#wild .playbutton .buy-this').hide(); // hide any buy this buttons
+        var index_location = 0;
+        $('#wild .playbutton').each(function(index_location) {
+            var button = '<button type="button" ' + 'id="wild' + index_location +'" ' +
+            'name="' + index_location + '" class="btn btn-warning btn-mini select-this">Select This</button>';
+            $(this).append(button);
+            index_location = index_location + 1;
+        });
+    });
+
 
 });

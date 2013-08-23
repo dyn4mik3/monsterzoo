@@ -178,6 +178,12 @@
             socket.emit('selected_card_from_zoo', this.name);
         });
 
+        // Bind the select card zoo buttons
+        $('.row').on('click', '#wild .select-this', function(event) {
+            console.log("Clicked on a pick this button in the Wild.");
+            socket.emit('selected_card_from_wild', this.name);
+        });
+
         // Bind the card buy this buttons
         $('.row').on('click', '.buy-this', function(event) {
             socket.emit('buy', this.name);
