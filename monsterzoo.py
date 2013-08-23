@@ -37,6 +37,15 @@ class Card(object):
         self.socket.emit('select_cards', player.player_id, played_card_index) 
         self.socket.log('Sent emit selected_cards')
 
+    def get_other_player(self, player):
+        player_index = self.socket.players.index(player)
+        if player_index == 0:
+            return self.socket.players[1]
+        elif player_index == 1:
+            return self.socket.players[0]
+        else:
+            print "Something went wrong when getting the other player index"
+
     def find_location(self, player):
         hand = player.hand
         deck = player.deck
@@ -246,6 +255,83 @@ class BoomerBoogly(Card):
         print "Played Whompo Boogly"
         self.socket.render_game()
 
+class FloBoogly(Card):
+    def __init__(self):
+        self.name = 'Flo Boogly'
+        self.description = 'Zoo Effect: Draw a card each time you put a Monster into your Zoo'
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 3
+        self.image = "/static/images/Boogly.png"
+    
+    def play(self, player):
+        self.discard(player)
+        print "Played Flo Boogly"
+        self.socket.render_game()
+
+class KoppiBoogly(Card):
+    def __init__(self):
+        self.name = 'Koppi Boogly'
+        self.description = 'Draw 3 Cards if you have a Boogly in your Zoo.'
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 2
+        self.image = "/static/images/Boogly.png"
+    
+    def play(self, player):
+        self.discard(player)
+        count = 0
+        for card in player.zoo.cards:
+            if card.card_family == "Boogly":
+                count += 1
+        if count > 0:
+            player.deal(3)
+        else:
+            print "No Boogly in Zoo"
+        print "Played Koppi Boogly"
+        self.socket.render_game()
+
+class LanzoBoogly(Card):
+    def __init__(self):
+        self.name = 'Lanzo Boogly'
+        self.description = "Take a random card from other player\'s hand. Put it in your hand."
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 5
+        self.image = "/static/images/Boogly.png"
+    
+    def play(self, player):
+        opponent = self.get_other_player(player)
+        opponent_hand = opponent.hand.cards
+        card = random.choice(opponent_hand)
+        card.discard(opponent)
+        player.hand.add_to_bottom(card)
+        print "Played Lanzo Boogly"
+        self.discard(player)
+        self.socket.render_game()
+
+class LurtiBoogly(Card):
+    def __init__(self):
+        self.name = 'Lurti Boogly'
+        self.description = "Put the top card from other player's deck into your hand."
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 4
+        self.image = "/static/images/Boogly.png"
+    
+    def play(self, player):
+        opponent = self.get_other_player(player)
+        opponent_deck = opponent.deck.cards
+        card = opponent_deck.draw_card(1)
+        if card:
+            player.hand.add_to_bottom(card)
+        else:
+            print "No card to add. Lurti Boogly did nothing"
+        print "Played Lurti Boogly"
+        self.discard(player)
+        self.socket.render_game()
+
+
 class OoglyBoogly(Card):
     def __init__(self):
         self.name = 'Oogly Boogly'
@@ -256,9 +342,9 @@ class OoglyBoogly(Card):
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
-        self.discard(player)
         player.deal(3) # draw 3 cards 
         print "Played Oogly Boogly"
+        self.discard(player)
         self.socket.render_game()
 
 class ZookeeZoogly(Card):
@@ -317,7 +403,12 @@ class Deck(object):
             print card
     
     def draw_card(self):
-        return self.cards.pop(0)
+        try:
+            card = self.cards.pop(0)
+            return card
+        except:
+            print "No more cards in deck"
+            return None
 
     def is_empty(self):
         return (len(self.cards) == 0)
@@ -371,8 +462,11 @@ class Player(object):
                 self.deck.shuffle_cards()
                 
             card = self.deck.draw_card()
-            self.hand.add_to_bottom(card)
-            cards.append(card)
+            if card:
+                self.hand.add_to_bottom(card)
+                cards.append(card)
+            else:
+                print "No cards drawn. Did not append any cards"
         return cards
     
     def play(self, card):
@@ -394,7 +488,13 @@ class Wild(Player):
                 WhompoBoogly(),
                 WhompoBoogly(),
                 BoomerBoogly(),
-                BoomerBoogly()
+                BoomerBoogly(),
+                KoppiBoogly(),
+                KoppiBoogly(),
+                LanzoBoogly(),
+                LanzoBoogly(),
+                LurtiBoogly(),
+                LurtiBoogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
@@ -418,30 +518,6 @@ class Game(object):
         for player in self.players:
             player.deck.shuffle_cards()
             
-        '''
-        WILD_DECK = [
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly(),
-            OoglyBoogly()
-        ]
-        self.wild_deck = Deck()
-        self.wild_deck.cards = WILD_DECK
-        self.wild_discard = Deck()
-        self.wild_hand = Hand() # this is the open face pile in middle
-        '''
-
     def start(self):
         print "Dealing cards to players"
         for player in self.players:

@@ -208,12 +208,13 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.broadcast_event('empty', player.player_id)
             location = 0
             for card in cards: # render cards in hand
-                self.broadcast_event('render_card', player.player_id, card.name, card.cost, card.image, card.description, location);
+                self.log('Rendering card with info %r, %r, %r, %r, %r, %r' % (player.player_id, card.name, card.cost, card.image, card.description, location))
+                self.broadcast_event('render_card', player.player_id, card.name, card.cost, card.image, card.description, location)
                 location += 1
             self.broadcast_event('empty_zoo', player.player_id)
             location = 0
             for card in zoo: # render cards in zoo
-                self.broadcast_event('render_zoo', player.player_id, card.name, card.cost, card.image, card.description, location);
+                self.broadcast_event('render_zoo', player.player_id, card.name, card.cost, card.image, card.description, location)
                 location += 1
             self.broadcast_event('food', player.player_id, player.food)
             self.broadcast_event('score', player.player_id, player.score)
@@ -223,7 +224,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.broadcast_event('empty', 'wild')
         for card in cards:
             self.broadcast_event('announcement', 'Wild has the following cards: %r' % self.game.wild.hand.cards)
-            self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location);
+            self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location)
             location += 1
         if self.game.state == 'end':
             score_dictionary = {}
@@ -241,7 +242,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         for card in cards:
             self.log('Player {%s} requested a card. {%r}' % (player_id, card))
             self.broadcast_event('announcement', 'Player {%s} has the following cards: %r' % (player_id, player.hand.cards))
-            self.broadcast_event('render_card', player_id, card.name, card.cost, card.image, card.description, location);
+            self.broadcast_event('render_card', player_id, card.name, card.cost, card.image, card.description, location)
             location += 1
 
     def render_wild(self, wild):
@@ -251,7 +252,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         for card in cards:
             self.log('Wild requested a card. {%r}' % card)
             self.broadcast_event('announcement', 'Wild has the following cards: %r' % wild.hand.cards)
-            self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location);
+            self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location)
             location += 1
 
     def on_login(self, username):
