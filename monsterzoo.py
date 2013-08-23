@@ -12,6 +12,9 @@ class Card(object):
     def __str__(self):
         return self.name
 
+    def zoo_effect(self, player):
+        pass
+
     def discard(self, player):
         hand = player.hand
         discard = player.discard
@@ -249,6 +252,11 @@ class WhompoBoogly(Card):
         print "Played Whompo Boogly"
         self.socket.render_game()
 
+    def zoo_effect(self, player):
+        player.deal(1)
+        print "Zoo Effect Whompo Boogly"
+        self.socket.render_game()
+
 class BoomerBoogly(Card):
     def __init__(self):
         self.name = 'Boomer Boogly'
@@ -392,6 +400,23 @@ class PortaBoogly(Card):
             self.socket.play_stack.append(self)
             print "Porta: Play stack is %r" % self.socket.play_stack
 
+class ChunkyOogly(Card):
+    def __init__(self):
+        self.name = 'Chunky Oogly'
+        self.description = '+2 Food. Draw a Card.'
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 3
+        self.image = "/static/images/Oogly.png"
+    
+    def play(self, player):
+        player.deal(1) # draw 3 cards 
+        player.food += 2
+        print "Played Chunky Oogly"
+        self.discard(player)
+        self.socket.render_game()
+
+
 class OoglyBoogly(Card):
     def __init__(self):
         self.name = 'Oogly Boogly'
@@ -487,7 +512,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [PortaBoogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [WhompoBoogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -665,6 +690,9 @@ class Game(object):
             print "Player now has %r cards" % len(player.hand.cards)
         elif count_of_cards > 5:
             print "Player has more than 5 cards. No extra cards dealt"
+        print "Calculating zoo effects"
+        for card in player.zoo.cards:
+            card.zoo_effect(player)
 
     def calculate_scores(self):
         for player in self.players:
