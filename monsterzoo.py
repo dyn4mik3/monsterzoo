@@ -321,8 +321,9 @@ class LurtiBoogly(Card):
     
     def play(self, player):
         opponent = self.get_other_player(player)
-        opponent_deck = opponent.deck.cards
-        card = opponent_deck.draw_card(1)
+        print "This is the opponent returned by Lurti: %r" % opponent
+        card = opponent.deck.draw_card()
+        print "This is the card returned by Lurti: %r" % card
         if card:
             player.hand.add_to_bottom(card)
         else:
@@ -606,10 +607,13 @@ class Game(object):
         count_of_cards = len(player.hand.cards)
         print "Setting up next turn for Player %r" % player
         print "Player has %r cards" % count_of_cards
-        cards_to_draw = 5 - count_of_cards
-        print "Dealing Player %r cards" % cards_to_draw
-        player.deal(cards_to_draw)
-        print "Player now has %r cards" % len(player.hand.cards)
+        if count_of_cards <= 5:
+            cards_to_draw = 5 - count_of_cards
+            print "Dealing Player %r cards" % cards_to_draw
+            player.deal(cards_to_draw)
+            print "Player now has %r cards" % len(player.hand.cards)
+        elif count_of_cards > 5:
+            print "Player has more than 5 cards. No extra cards dealt"
 
     def calculate_scores(self):
         for player in self.players:
