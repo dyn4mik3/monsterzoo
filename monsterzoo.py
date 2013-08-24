@@ -37,18 +37,14 @@ class Card(object):
     def select_cards(self, num, player, played_card_index):
         self.socket.log('Getting Selected Card from Client')
         self.socket.log('Data passed to select_cards %r %r %r' % (num, player, played_card_index))
-        card_index = []
-        if played_card_index:
-            card_index.append(played_card_index)
+        card_index = [played_card_index]
         self.socket.emit('select_cards', player.player_id, card_index) 
         self.socket.log('Sent emit selected_cards')
 
     def select_only_monsters(self, num, player, played_card_index):
         self.socket.log('Getting Selected Card from Client')
         self.socket.log('Data passed to select_cards %r %r %r' % (num, player, played_card_index))
-        card_index = []
-        if played_card_index:
-            card_index.append(played_card_index)
+        card_index = [played_card_index]
         # ADD FOOD TO CARD INDEX
         for card in player.hand.cards:
             if card.card_type == "Food":
@@ -56,7 +52,6 @@ class Card(object):
         print "Card index for selected_cards %r" % card_index
         self.socket.emit('select_cards', player.player_id, card_index) 
         self.socket.log('Sent emit selected_cards')
-
 
     def select_cards_wild(self, num, player):
         self.socket.emit('select_card_from_wild', player.player_id)
@@ -412,6 +407,41 @@ class PortaBoogly(Card):
             self.socket.play_stack.append(self)
             print "Porta: Play stack is %r" % self.socket.play_stack
 
+class HuntoOogly(Card):
+    def __init__(self):
+        self.name = 'Hunto Oogly'
+        self.description = "Move a card from The Wild to the top of your deck."
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 5
+        self.image = "/static/images/Oogly.png"
+    
+    def play(self, player):
+        self.socket.log('In the Play Loop for Hunto Oogly')
+        # select a card in the wild
+        # move card to top of deck
+        if self.socket.selected_cards_wild:
+            wildcard = self.get_selected_card_wild()
+            wild = self.socket.game.wild
+            wild.hand.remove_card(wildcard)
+            player.deck.add_to_top(wildcard)
+            wild.deal(1)
+            self.discard(player)
+            self.socket.log('Played: Hunto Oogly')
+            self.socket.selected_cards_wild = [] # reset the selected cards from wild
+            self.socket.render_game()
+            self.socket.play_stack.remove(self)
+        else:
+            self.socket.log('Going to select_cards function')
+            try:
+                hunto = player.hand.cards.index(self)
+            except:
+                hunto = None
+                print "Hunto is not in hand."
+            self.select_cards_wild(1, player) # issue with meera boogly, if this is run then meera is played before card can be selected
+            self.socket.play_stack.append(self)
+            print "Hunto: Play stack is %r" % self.socket.play_stack
+
 class ChunkyOogly(Card):
     def __init__(self):
         self.name = 'Chunky Oogly'
@@ -457,6 +487,37 @@ class OoglyBoogly(Card):
         print "Played Oogly Boogly"
         self.discard(player)
         self.socket.render_game()
+
+class JusteeZoogly(Card):
+    def __init__(self):
+        self.name = 'Justee Zoogly'
+        self.description = 'Remove a card in your hand from the game. Draw a card.'
+        self.card_type = "Monster"
+        self.card_family = "Zoogly"
+        self.cost = 2
+        self.image = "/static/images/Zoogly.png"
+
+    def play(self, player):
+        self.socket.log('In the Play Loop for Justee Zoogly')
+        if self.socket.selected_cards:
+            card = self.get_selected_card()
+            player.hand.remove_card(card)
+            player.deal(1)
+            self.discard(player)
+            self.socket.log('Played: Justee Zoogly')
+            self.socket.selected_cards = [] # reset the selected cards
+            self.socket.render_game()
+            self.socket.play_stack.remove(self)
+        else:
+            self.socket.log('Going to select_cards function')
+            try:
+                justee = player.hand.cards.index(self)
+            except:
+                justee = None
+                print "Justee is not in hand."
+            self.select_cards(1, player, justee) # issue with meera boogly, if this is run then meera is played before card can be selected
+            self.socket.play_stack.append(self)
+            print "Justee: Play stack is %r" % self.socket.play_stack
 
 class ZookeeZoogly(Card):
     def __init__(self):
@@ -538,7 +599,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [RinkaOogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [HuntoOogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -595,7 +656,13 @@ class Wild(Player):
                 LurtiBoogly(),
                 LurtiBoogly(),
                 PortaBoogly(),
-                PortaBoogly()
+                PortaBoogly(),
+                ChunkyOogly(),
+                ChunkyOogly(),
+                RinkaOogly(),
+                RinkaOogly(),
+                JusteeZoogly(),
+                JusteeZoogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)

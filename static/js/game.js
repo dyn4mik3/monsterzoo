@@ -184,6 +184,7 @@ $(function() {
         $('#player1 .play-this').html('Pick This Card');
         $('#player1 .playbutton .btn').toggleClass('play-this pick-this');
         $('#player1 .playbutton .btn').toggleClass('btn-primary btn-warning');
+        //console.log(card_index);
         if (card_index != null) {
             for (var i=0; i < card_index.length; i++) {
             $('#player1 .playbutton [name="'+ card_index[i] +'"]').hide();
