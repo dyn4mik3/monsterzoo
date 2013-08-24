@@ -70,24 +70,6 @@ $(function() {
         }, 10);
     };
 
-/*
-    socket.on('deal_card', function(player, card_name, card_cost, card_image, card_text) {
-        var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
-        '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
-        '</span></div><div class="card_image"><p><img src="' + card_image +
-        '" height="80px"></p>' + card_text +
-        '</div>' +
-        '<div class="playbutton">' +
-        '<button type="button" name="' + card_name + '" class="btn btn-primary btn-mini">Play This Card</button>' +
-        '</div></div>';
-        if (player == this.socket.sessionid) {
-            $('#player1').append(card_layout);
-        }
-        else {
-            $('#player2').append(card_layout);
-        };
-    });
-*/
     socket.on('empty', function(player) {
         if (player == 'wild') {
             $('#wild').empty();
@@ -207,8 +189,6 @@ $(function() {
             $('#player1 .playbutton [name="'+ card_index[i] +'"]').hide();
             };
         };
-        // socket.emit('selected_card', selected_card);
-        //socket.emit('user_message', 'Card has been selected ' + selected_card);
     });
 
     socket.on('select_card_from_zoo', function(player, card_index) {
@@ -217,9 +197,6 @@ $(function() {
         $('#player1-zoo .playbutton .btn').show();
         $('#player1-zoo .playbutton .btn').toggleClass('play-this pick-this');
         $('#player1-zoo .playbutton .btn').toggleClass('btn-primary btn-warning');
-        // $('#player1-zoo .playbutton [name="'+ card_index +'"]').hide();
-        // socket.emit('selected_card', selected_card);
-        //socket.emit('user_message', 'Card has been selected ' + selected_card);
     });
 
     socket.on('select_card_from_wild', function(player, card_index) {
