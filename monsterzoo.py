@@ -519,6 +519,29 @@ class JusteeZoogly(Card):
             self.socket.play_stack.append(self)
             print "Justee: Play stack is %r" % self.socket.play_stack
 
+class OhnoZoogly(Card):
+    def __init__(self):
+        self.name = 'Ohno Zoogly'
+        self.description = 'Swap this card with a card in your Zoo.'
+        self.card_type = "Monster"
+        self.card_family = "Zoogly"
+        self.cost = 6
+        self.image = "/static/images/Zoogly.png"
+
+    def play(self, player):
+        if self.socket.selected_cards:
+            card = self.get_selected_card()
+            self.socket.selected_cards = [] # reset the selected cards
+            player.hand.remove_card(self)
+            player.zoo.remove_card(card)
+            player.hand.add_to_bottom(card)
+            player.zoo.add_to_bottom(self)
+            self.socket.log('Played Ohno Zoogly')
+            self.socket.render_game()
+        else:
+            ohno = player.hand.cards.index(self)
+            self.select_card_from_zoo(player, ohno)
+
 class ZookeeZoogly(Card):
     def __init__(self):
         self.name = 'Zookee Zoogly'
@@ -599,7 +622,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [HuntoOogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [OhnoZoogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -662,7 +685,9 @@ class Wild(Player):
                 RinkaOogly(),
                 RinkaOogly(),
                 JusteeZoogly(),
-                JusteeZoogly()
+                JusteeZoogly(),
+                OhnoZoogly(),
+                OhnoZoogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
