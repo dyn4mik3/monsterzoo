@@ -458,6 +458,22 @@ class ChunkyOogly(Card):
         self.discard(player)
         self.socket.render_game()
 
+class YummliOogly(Card):
+    def __init__(self):
+        self.name = 'Yummli Oogly'
+        self.description = 'Double all Food gained so far this turn.'
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 6
+        self.image = "/static/images/Oogly.png"
+    
+    def play(self, player):
+        player.food = player.food * 2
+        print "Played Yummli Oogly"
+        self.discard(player)
+        self.socket.render_game()
+
+
 class RinkaOogly(Card):
     def __init__(self):
         self.name = 'Rinka Oogly'
@@ -574,6 +590,40 @@ class ZookeeZoogly(Card):
             self.socket.play_stack.append(self)
             print "Zookee: Play stack is %r" % self.socket.play_stack
 
+class ZoomiZoogly(Card):
+    def __init__(self):
+        self.name = 'Zoomi Zoogly'
+        self.description = 'Move a Monster to your Zoo. If you put an Oogly into your Zoo, draw 2 cards.'
+        self.card_type = "Monster"
+        self.card_family = "Zoogly"
+        self.cost = 5
+        self.image = "/static/images/Zoogly.png"
+        self.socket = '' # this will hold the socketio object
+    
+    def play(self, player):
+        self.socket.log('In the Play Loop for Zoomi Zoogly')
+        if self.socket.selected_cards:
+            card = self.get_selected_card()
+            player.hand.remove_card(card)
+            player.zoo.add_to_bottom(card)
+            if card.card_family == "Oogly":
+                player.deal(2)
+            self.discard(player)
+            self.socket.log('Played: Zoomi Zoogly')
+            self.socket.selected_cards = [] # reset the selected cards
+            self.socket.render_game()
+            self.socket.play_stack.remove(self)
+        else:
+            self.socket.log('Going to select_cards function')
+            try:
+                zoomi = player.hand.cards.index(self)
+            except:
+                zoomi = None
+                print "Zoomi is not in hand."
+            self.select_only_monsters(1, player, zoomi) # issue with meera boogly, if this is run then meera is played before card can be selected
+            self.socket.play_stack.append(self)
+            print "Zoomi: Play stack is %r" % self.socket.play_stack
+
 class Deck(object):
     def __init__(self):
         self.cards = []
@@ -622,7 +672,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [OhnoZoogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [ZoomiZoogly(),HuntoOogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -687,7 +737,13 @@ class Wild(Player):
                 JusteeZoogly(),
                 JusteeZoogly(),
                 OhnoZoogly(),
-                OhnoZoogly()
+                OhnoZoogly(),
+                HuntoOogly(),
+                HuntoOogly(),
+                YummliOogly(),
+                YummliOogly(),
+                ZoomiZoogly(),
+                ZoomiZoogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
