@@ -69,7 +69,7 @@ def create_room():
     """
     name = request.form['name']
     if name:
-        room = GameRoom() 
+        room = GameRoom(name=name)
         live_rooms.append(room)
     return redirect(url_for('index'))
 
