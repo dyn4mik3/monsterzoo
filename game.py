@@ -232,7 +232,6 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         location = 0
         self.broadcast_event('empty', 'wild')
         for card in cards:
-            self.broadcast_event('announcement', 'Wild has the following cards: %r' % self.game.wild.hand.cards)
             self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location)
             location += 1
         if self.game.state == 'end':
@@ -250,7 +249,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.broadcast_event('empty', player_id)
         for card in cards:
             self.log('Player {%s} requested a card. {%r}' % (player_id, card))
-            self.broadcast_event('announcement', 'Player {%s} has the following cards: %r' % (player_id, player.hand.cards))
+            #self.broadcast_event('announcement', 'Player {%s} has the following cards: %r' % (player_id, player.hand.cards))
             self.broadcast_event('render_card', player_id, card.name, card.cost, card.image, card.description, location)
             location += 1
 
@@ -260,7 +259,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.broadcast_event('empty', 'wild')
         for card in cards:
             self.log('Wild requested a card. {%r}' % card)
-            self.broadcast_event('announcement', 'Wild has the following cards: %r' % wild.hand.cards)
+            #self.broadcast_event('announcement', 'Wild has the following cards: %r' % wild.hand.cards)
             self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location)
             location += 1
 
@@ -284,7 +283,6 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.broadcast_event('game_start', len(self.players))
             GameNamespace.game = Game(self.players)
             #self.game = GameNamespace.game
-            self.broadcast_event('announcement', "Deck contains %r" % self.game.wild.deck.cards)
             self.game.wild.deal(5)
             self.render_wild(self.game.wild)
             for player in self.players:
