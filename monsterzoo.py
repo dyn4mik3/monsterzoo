@@ -128,12 +128,12 @@ class DirtySocks(Card):
         self.cost = 0
         self.food = 1
         self.image = "/static/images/Food.png"
-    
+
     def play(self, player):
         self.discard(player)
         player.food += self.food
         print "Played Dirty Socks"
-        self.socket.render_game()
+        #self.socket.render_game()
 
 class Cookies(Card):
     def __init__(self):
