@@ -133,7 +133,7 @@ class DirtySocks(Card):
         self.discard(player)
         player.food += self.food
         print "Played Dirty Socks"
-        #self.socket.render_game()
+        self.socket.render_game()
 
 class Cookies(Card):
     def __init__(self):
