@@ -527,6 +527,25 @@ class ParksOogly(Card):
         self.discard(player)
         self.socket.render_game()
 
+class FifiOogly(Card):
+    def __init__(self):
+        self.name = 'Fifi Oogly'
+        self.description = '-2 Food. Monsters cost 1 less food to catch this turn. Zoo Effect: Monsters cost 1 less to catch this turn.'
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 3
+        self.image = "/static/images/Oogly.png"
+    
+    def play(self, player):
+        player.food -= 2
+        player.food_discount += 1
+        print "Played Parks Oogly"
+        self.discard(player)
+        self.socket.render_game()
+    
+    def zoo_effect(self, player):
+        player.food_discount += 1
+
 class OoglyBoogly(Card):
     def __init__(self):
         self.name = 'Oogly Boogly'
@@ -709,7 +728,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [ParksOogly(),ParksOogly(),ParksOogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [FifiOogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -719,6 +738,7 @@ class Player(object):
         self.food_discount = 0
         self.score = 0
         self.player_id = player_id
+        self.turn = False
     
     def deal(self, num):
         cards = []
@@ -783,7 +803,11 @@ class Wild(Player):
                 ZoomiZoogly(),
                 ZoomiZoogly(),
                 RipliOogly(),
-                RipliOogly()
+                RipliOogly(),
+                ParksOogly(),
+                ParksOogly(),
+                FifiOogly(),
+                FifiOogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
@@ -892,6 +916,17 @@ class Game(object):
             self.turn(player)
     
     def setup_next_turn(self, player):
+        player_location = self.players.index(player)
+        if player == self.players[-1]:
+            # player is last player, next player set to location 0
+            next_player = self.players[0]
+        else:
+            next_player = self.players[(player_location + 1)]
+        for x in self.players:
+            if x == next_player:
+                x.turn = True
+            else:
+                x.turn = False
         print "Setting food to zero"
         player.food = 0
         print "Reset card costs"

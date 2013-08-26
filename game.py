@@ -211,10 +211,9 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         return True
 
     def get_food_discount(self):
-        discount_list = []
         for player in self.game.players:
-            discount_list.append(player.food_discount)
-        return max(discount_list)
+            if player.turn == True:
+                return player.food_discount
 
     def render_game(self):
         # calculate score
@@ -302,6 +301,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
                     self.on_deal(player.player_id)
             self.log('Playing Game')
             self.broadcast_event('turn', self.players[1].player_id)
+            self.players[0].turn = True
             self.log("Game is %r" % self.game)
 
     def on_turn(self):
