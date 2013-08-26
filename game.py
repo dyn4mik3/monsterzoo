@@ -186,8 +186,9 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         wild = self.game.wild
         card = wild.hand.cards[location]
         self.log('Buying card %r' % card)
-        if card.cost <= player.food:
-            player.food = player.food - card.cost
+        modified_card_cost = max(0,(card.cost - player.food_discount))
+        if modified_card_cost <= player.food:
+            player.food = player.food - modified_card_cost
             wild.hand.remove_card(card)
             player.discard.add_to_bottom(card)
             try:
@@ -195,6 +196,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
             except:
                 self.log('No more cards in the wild.')
             self.render_game()
+        else:
+            print "Card cost greater than food + food_discount"
 
     def on_deal(self, player_id, num = 1):
         player = self.nicknames[player_id]
@@ -206,6 +209,12 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         #    self.broadcast_event('announcement', 'Player {%s} has the following cards: %r' % (player_id, player.hand.cards))
         #    self.broadcast_event('deal_card', player_id, card.name, card.cost, card.image, card.description);
         return True
+
+    def get_food_discount(self):
+        discount_list = []
+        for player in self.game.players:
+            discount_list.append(player.food_discount)
+        return max(discount_list)
 
     def render_game(self):
         # calculate score
@@ -227,12 +236,14 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
                 location += 1
             self.broadcast_event('food', player.player_id, player.food)
             self.broadcast_event('score', player.player_id, player.score)
+            self.broadcast_event('food_discount', player.player_id, player.food_discount)
         # render wild
+        food_discount = self.get_food_discount()
         cards = self.game.wild.hand.cards
         location = 0
         self.broadcast_event('empty', 'wild')
         for card in cards:
-            self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location)
+            self.broadcast_event('render_wild', 'wild', card.name, max(0,card.cost - food_discount), card.image, card.description, location)
             location += 1
         if self.game.state == 'end':
             score_dictionary = {}

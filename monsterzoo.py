@@ -15,6 +15,14 @@ class Card(object):
     def zoo_effect(self, player):
         pass
 
+    def move_selected_card_to_zoo(self, player):
+        card = self.get_selected_card()
+        # Special rule for Ripli Oogly
+        if card.name == "Ripli Oogly":
+            player.food += len(player.zoo.cards)
+        player.hand.remove_card(card)
+        player.zoo.add_to_bottom(card)
+
     def discard(self, player):
         hand = player.hand
         discard = player.discard
@@ -489,6 +497,36 @@ class RinkaOogly(Card):
         self.discard(player)
         self.socket.render_game()
 
+class RipliOogly(Card):
+    def __init__(self):
+        self.name = 'Ripli Oogly'
+        self.description = 'Gain Food equal to the number of cards in your Zoo when this card enters your Zoo."'
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 3
+        self.image = "/static/images/Oogly.png"
+    
+    def play(self, player):
+        print "Played Ripli Oogly"
+        self.discard(player)
+        self.socket.render_game()
+
+class ParksOogly(Card):
+    def __init__(self):
+        self.name = 'Parks Oogly'
+        self.description = '+2 Food. Monsters cost 1 less food to catch this turn.'
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 5
+        self.image = "/static/images/Oogly.png"
+    
+    def play(self, player):
+        player.food += 2
+        player.food_discount += 1
+        print "Played Parks Oogly"
+        self.discard(player)
+        self.socket.render_game()
+
 class OoglyBoogly(Card):
     def __init__(self):
         self.name = 'Oogly Boogly'
@@ -571,9 +609,10 @@ class ZookeeZoogly(Card):
     def play(self, player):
         self.socket.log('In the Play Loop for Zookee Zoogly')
         if self.socket.selected_cards:
-            card = self.get_selected_card()
-            player.hand.remove_card(card)
-            player.zoo.add_to_bottom(card)
+            self.move_selected_card_to_zoo(player)
+            #card = self.get_selected_card()
+            #player.hand.remove_card(card)
+            #player.zoo.add_to_bottom(card)
             self.discard(player)
             self.socket.log('Played: Zookee Zoogly')
             self.socket.selected_cards = [] # reset the selected cards
@@ -603,9 +642,7 @@ class ZoomiZoogly(Card):
     def play(self, player):
         self.socket.log('In the Play Loop for Zoomi Zoogly')
         if self.socket.selected_cards:
-            card = self.get_selected_card()
-            player.hand.remove_card(card)
-            player.zoo.add_to_bottom(card)
+            self.move_selected_card_to_zoo(player)
             if card.card_family == "Oogly":
                 player.deal(2)
             self.discard(player)
@@ -672,13 +709,14 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [ZoomiZoogly(),HuntoOogly(),OoglyBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [ParksOogly(),ParksOogly(),ParksOogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
         self.discard = Deck()
         self.zoo = Hand()
         self.food = 0
+        self.food_discount = 0
         self.score = 0
         self.player_id = player_id
     
@@ -743,7 +781,9 @@ class Wild(Player):
                 YummliOogly(),
                 YummliOogly(),
                 ZoomiZoogly(),
-                ZoomiZoogly()
+                ZoomiZoogly(),
+                RipliOogly(),
+                RipliOogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
@@ -854,6 +894,8 @@ class Game(object):
     def setup_next_turn(self, player):
         print "Setting food to zero"
         player.food = 0
+        print "Reset card costs"
+        player.food_discount = 0
         count_of_cards = len(player.hand.cards)
         print "Setting up next turn for Player %r" % player
         print "Player has %r cards" % count_of_cards
