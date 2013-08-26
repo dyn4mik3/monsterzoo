@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!--
 	<h1>Rooms</h1>
     <ul>
 	    {% for room in live_rooms %}
@@ -20,5 +21,29 @@
 	<form method="post" action="{{ url_for('create_room') }}">
 		<input type="text" id="name" name="name">
 		<input type="submit" id="submit" value="Add Room">
-	</form>
+    </form>
+-->
+    <div class="page-header">
+        <h1>Get Started</h1>
+    </div>
+    <p class="lead">Click here to <a href="{{ url_for('room') }}" class="btn btn-success">Start a Game</a></p>
+    <p class="lead">Online version only supports 2 players at the moment.</p>
+
+    <div class="page-header">
+        <h1>Quick Start Guide</h1>
+    </div>
+    <h2>Login</h2>
+    <ul>
+        <li>Click on the "Start a Game" link above</li>
+        <li>Enter in a user name in the chat box</li>
+        <li>Once 2 players have entered in their user name, the game will start</li>
+    </ul>
+    <h2>Game Play</h2>
+    <ul>
+        <li>Play cards from your hand</li>
+        <li>Acquire cards from The Wild using Food resources</li>
+        <li>Move Monster cards into your Zoo for points</li>
+        <li>First player to 20 wins</li>
+    </ul>
+
 {% endblock content %}

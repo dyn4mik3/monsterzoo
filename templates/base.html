@@ -22,9 +22,43 @@
             </div>
             <div class="container">
                 <div class="page-header">
-                    <h1>Monster Zoo - Online</h1>
+                    <h1>Monster Zoo - Online Playtest [v0.1]</h1>
                 </div>
-                <p class="lead">This is the information for the <code>game</code>.</p>
+                <p class="lead">Read the <a data-toggle="modal" href="#rules"><code>quickplay rules</code></a> or the <a href="http://bit.ly/10tMUIo" target="_blank"><code>full rules</code></a>.</p>
+                <!-- Modal -->
+                <div class="modal fade" id="rules">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Game Rules</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>Monster Zoo is a deckbuilding game for 2-4 players.</p>
+                                <p><b>Goal</b></p>
+                                <p>Be the first player to build a Zoo worth 20 points.</p>
+                                <p><b>How to Play</b></p>
+                                <p>During your turn:</p>
+                                <p><ul>
+                                    <li>Play any number of cards from your hand.</li>
+                                    <li>Use Food to catch cards from The Wild (middle set of cards).</li>
+                                    <li>Caught cards will be placed into your discard pile. When you run out of cards in your deck, your discard pile will become your new deck.</li>
+                                    <li>Move Monsters into your Zoo for points.</li>
+                                    <li>Card with "Zoo Effects" give you a bonus at the beginning of your turn.</li>
+                                </ul></p>
+                                <p>End of turn:</p>
+                                <p><ul>
+                                    <li>Draw until you have at least 5 cards in your hand.</li>
+                                </ul></p>
+                                <p><b>Playtest Notes:</b></p>
+                                <p>This is a buggy play test system and the game may potentially break on you. Many of the cards/features from the game are not fully developed in the online version yet. Thanks for testing!</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div> <!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /modal -->
+                <!-- Modal -->
                 <div id="flash">
                     {% with messages = get_flashed_messages() %}
                         {% if messages %}

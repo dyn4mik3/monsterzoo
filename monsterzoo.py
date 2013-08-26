@@ -500,7 +500,7 @@ class RinkaOogly(Card):
 class RipliOogly(Card):
     def __init__(self):
         self.name = 'Ripli Oogly'
-        self.description = 'Gain Food equal to the number of cards in your Zoo when this card enters your Zoo."'
+        self.description = 'Gain Food equal to the number of cards in your Zoo when this card enters your Zoo.'
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 3
