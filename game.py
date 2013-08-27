@@ -86,6 +86,12 @@ class PlayerMixin(object):
         
         self.socket.server.sockets[player_id].send_packet(pkt)
 
+    def broadcast_to_players(self, players, event, *args):
+        pkt = dict(type="event", name=event, args=args, endpoint=self.ns_name)
+
+        for player in players:
+            self.socket.server.sockets[player.player_id].send_packet(pkt)
+
 class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     nicknames = {} # stores a dictionary with sessionids as key, Player objects as values
     players = [] # stores a list of Player objects
@@ -227,40 +233,44 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
                 return player.food_discount
 
     def render_game(self):
+        # NEED TO FIX THIS - RIGHT NOW RENDERING AFFECTS ALL PLAYERS. IT SHOULD ONLY AFFECT PLAYERS ASSOCIATED WITH GAME
         # calculate score
         self.game.calculate_scores()
         # render players
         for player in self.game.players:
             cards = player.hand.cards
             zoo = player.zoo.cards
-            self.broadcast_event('empty', player.player_id)
+            self.broadcast_to_players(self.game.players,'empty', player.player_id)
             location = 0
             for card in cards: # render cards in hand
                 self.log('Rendering card with info %r, %r, %r, %r, %r, %r' % (player.player_id, card.name, card.cost, card.image, card.description, location))
-                self.broadcast_event('render_card', player.player_id, card.name, card.cost, card.image, card.description, location)
+                self.broadcast_to_players(self.game.players,'render_card', player.player_id, card.name, card.cost, card.image, card.description, location)
                 location += 1
-            self.broadcast_event('empty_zoo', player.player_id)
+            self.broadcast_to_players(self.game.players, 'empty_zoo', player.player_id)
             location = 0
             for card in zoo: # render cards in zoo
-                self.broadcast_event('render_zoo', player.player_id, card.name, card.cost, card.image, card.description, location)
+                self.broadcast_to_players(self.game.players,'render_zoo', player.player_id, card.name, card.cost, card.image, card.description, location)
                 location += 1
-            self.broadcast_event('food', player.player_id, player.food)
-            self.broadcast_event('score', player.player_id, player.score)
-            self.broadcast_event('food_discount', player.player_id, player.food_discount)
+            self.broadcast_to_players(self.game.players, 'food', player.player_id, player.food)
+            self.broadcast_to_players(self.game.players,'score', player.player_id, player.score)
+            self.broadcast_to_players(self.game.players, 'food_discount', player.player_id, player.food_discount)
         # render wild
         food_discount = self.get_food_discount()
         cards = self.game.wild.hand.cards
         location = 0
-        self.broadcast_event('empty', 'wild')
+        self.broadcast_to_players(self.game.players, 'empty', 'wild')
+        #self.broadcast_event('empty', 'wild')
         for card in cards:
-            self.broadcast_event('render_wild', 'wild', card.name, max(0,card.cost - food_discount), card.image, card.description, location)
+            self.broadcast_to_players(self.game.players,'render_wild', 'wild', card.name, max(0,card.cost - food_discount), card.image, card.description, location)
+            #self.broadcast_event('render_wild', 'wild', card.name, max(0,card.cost - food_discount), card.image, card.description, location)
             location += 1
         if self.game.state == 'end':
             score_dictionary = {}
             for player in self.game.players:
                 score_dictionary[player.player_id] = player.score
+            # get player_id for the winning score
             winner = max(score_dictionary, key=score_dictionary.get)
-            self.broadcast_event('game_over', winner)
+            self.broadcast_to_players(self.game.players,'game_over', winner)
             self.log('Game over. Winner is %r' % winner)
 
     def render(self, player_id):
@@ -303,7 +313,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         new_game.wild.deal(5)
         for player in players:
             player.deal(5)
-        self.broadcast_event('turn', players[1].player_id)
+        self.broadcast_to_players(players, 'turn', players[1].player_id)
         players[0].turn = True
         self.log("Start game function complete")
         return new_game
@@ -363,9 +373,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.game.setup_next_turn(player)
         self.play_stack = [] # rest play stack
         self.render_game()
-        for player in self.game.players:
-            print "TURN INFO [%r %r %r]" % (player.player_id, "turn", self.socket.sessid)
-            self.broadcast_to_player(player.player_id, 'turn', self.socket.sessid)
+        self.broadcast_to_players(self.game.players, 'turn', self.socket.sessid)
         #self.broadcast_event('turn', self.socket.sessid)
 
     def on_user_message(self, msg):
