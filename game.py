@@ -123,6 +123,13 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.log("User has disconnected")
         self.log("Nicknames data: %r" % self.nicknames)
         self.log("Checking to see if username exists. Then deleting.")
+        # try removing from player_queue
+        try:
+            self.player_queue.remove(self.nicknames[user_id])
+        except:
+            print "Player not in queue"
+
+        # try removing player from self.players
         try:
             self.log("self.session['username'] is set to %s" % self.session['username'])
             username = self.session['username']
