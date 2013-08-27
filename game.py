@@ -80,11 +80,21 @@ def room():
     """
     return render_template('game_room.html')
 
-class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
+class PlayerMixin(object):
+    def broadcast_to_player(self, player_id, event, *args):
+        pkt = dict(type="event", name=event, args=args, endpoint=self.ns_name)
+        
+        self.socket.server.sockets[player_id].send_packet(pkt)
+
+class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     nicknames = {} # stores a dictionary with sessionids as key, Player objects as values
     players = [] # stores a list of Player objects
-    game = None
+    #game = None
     end_turn = False
+    login_count = 0
+    player_games = {}
+    player_queue = []
+    game_list = []
 
     def initialize(self):
         user_id = self.socket.sessid
@@ -100,6 +110,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.selected_cards_wild = []
         self.play_stack = []
         self.card = None
+        self.game = None
 
     def recv_disconnect(self):
         user_id = self.socket.sessid
@@ -273,6 +284,33 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.broadcast_event('render_wild', 'wild', card.name, card.cost, card.image, card.description, location)
             location += 1
 
+    def on_join_game(self, player_id):
+        self.game = self.player_games[int(player_id)]
+        print "Player: %r joined game %r" % (player_id, self.game)
+        player_registered = 0
+        # check to see if all players have joined the game
+        for player in self.game.players:
+            if self.game:
+                player_registered += 1
+        if player_registered == len(self.game.players):
+            self.render_game()
+ 
+    def start_game(self, players):
+        self.broadcast_event('announcement', '2 Players have connected')
+        new_game = Game(players)
+        self.game_list.append(new_game)
+        #GameNamespace.game = new_game
+        new_game.wild.deal(5)
+        for player in players:
+            player.deal(5)
+        self.broadcast_event('turn', players[1].player_id)
+        players[0].turn = True
+        self.log("Start game function complete")
+        return new_game
+
+    def register_game(self, player, game):
+        self.broadcast_event('register_game', int(player.player_id), self.game_list.index(game))
+
     def on_login(self, username):
         self.log('Username: {0}'.format(username))
         self.session['username'] = username
@@ -287,12 +325,26 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.broadcast_event('announcement', '%s has connected' % username)
         self.broadcast_event('announcement', '%s is player %d' % (username, self.players.index(self.nicknames[user_id])+1))
 
+        # Player queue. Once 2 are logged in, both are moved to a game.
+        GameNamespace.player_queue.append(self.nicknames[user_id])
+        if len(self.player_queue) == 2:
+            new_game = self.start_game(self.player_queue)
+            for player in self.player_queue:
+                self.player_games.update({int(player.player_id):new_game})
+                print "Updated Player Games: %r" % self.player_games
+                # send a message to all players and registers the game object 
+                self.register_game(player, new_game)
+            GameNamespace.player_queue = []
+            #self.render_game()
+        print "Player Queue: %r" % self.player_queue
+        print "Player Games: %r" % self.player_games
+
         # Once 2 players login, start game 
+        '''
         if len(self.players) == 2:
             self.broadcast_event('announcement', '2 Players have connected')
             self.broadcast_event('game_start', len(self.players))
             GameNamespace.game = Game(self.players)
-            #self.game = GameNamespace.game
             self.game.wild.deal(5)
             self.render_wild(self.game.wild)
             for player in self.players:
@@ -303,6 +355,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
             self.broadcast_event('turn', self.players[1].player_id)
             self.players[0].turn = True
             self.log("Game is %r" % self.game)
+        '''
 
     def on_turn(self):
         user_id = self.socket.sessid
@@ -310,8 +363,10 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin):
         self.game.setup_next_turn(player)
         self.play_stack = [] # rest play stack
         self.render_game()
-        self.broadcast_event('turn', self.socket.sessid)
-
+        for player in self.game.players:
+            print "TURN INFO [%r %r %r]" % (player.player_id, "turn", self.socket.sessid)
+            self.broadcast_to_player(player.player_id, 'turn', self.socket.sessid)
+        #self.broadcast_event('turn', self.socket.sessid)
 
     def on_user_message(self, msg):
         self.log('User message: {0}'.format(msg))

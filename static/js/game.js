@@ -12,6 +12,12 @@ $(function() {
     socket.on('game_start', function (players) {
         $('#game').append($('<p>Game start</p>'));
     });
+
+    socket.on('register_game', function(player_id, game_id) {
+        if (player_id == this.socket.sessionid) {
+            socket.emit('join_game', player_id);
+        };
+    });
     
     socket.on('game_over', function(player) {
         if (player == this.socket.sessionid) {
