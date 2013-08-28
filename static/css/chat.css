@@ -88,7 +88,7 @@ code {
     -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
     float: left; 
-    height: 280px; 
+    height: 120px; 
     margin: 0 8px 8px 0; 
     position: relative; 
     width: 120px; 
@@ -113,6 +113,11 @@ font-weight:bold;
 .card .card_image {
 text-align:center;margin-left:8px;margin-right:8px;margin-top:80px;
 }
+
+.cardback .card_image{
+text-align:center;margin-left:8px;margin-right:8px;margin-top:20px;
+}
+
 /* CHAT BOX */
 
 #chat,
