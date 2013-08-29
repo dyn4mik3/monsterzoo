@@ -17,10 +17,16 @@ from monsterzoo import *
 
 from datetime import datetime
 
+import logging
+from logging.handlers import RotatingFileHandler
+
 # create a Flask app
 app = Flask(__name__)
 app.debug = True
-
+handler = RotatingFileHandler('console.log', maxBytes=1000000, backupCount=5)
+handler.setLevel(logging.INFO)
+app.logger.addHandler(handler)
+ 
 # "models"
 class GameRoom():
     def __init__(self,name=""):
@@ -402,4 +408,4 @@ def socketio(remaining):
 
 # start the app
 if __name__ == '__main__':
-    app.run()
+   app.run()
