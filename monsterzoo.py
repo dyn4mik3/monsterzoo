@@ -325,6 +325,7 @@ class KoppiBoogly(Card):
             if card.card_family == "Boogly":
                 count += 1
         if count > 0:
+            print "Found a Boogly in Zoo. Dealing 3 Cards."
             player.deal(3)
         else:
             print "No Boogly in Zoo"
@@ -530,16 +531,16 @@ class ParksOogly(Card):
 class FifiOogly(Card):
     def __init__(self):
         self.name = 'Fifi Oogly'
-        self.description = '-2 Food. Monsters cost 1 less food to catch this turn. Zoo Effect: Monsters cost 1 less to catch this turn.'
+        self.description = '+1 Food. Monsters cost 1 less food to catch this turn. Zoo Effect: Monsters cost 1 less to catch this turn.'
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 3
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
-        player.food -= 2
+        player.food += 1
         player.food_discount += 1
-        print "Played Parks Oogly"
+        print "Played Fifi Oogly"
         self.discard(player)
         self.socket.render_game()
     
