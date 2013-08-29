@@ -15,6 +15,8 @@ from flask import Flask, Response, flash, request, session, render_template, url
 
 from monsterzoo import *
 
+from datetime import datetime
+
 # create a Flask app
 app = Flask(__name__)
 app.debug = True
@@ -157,7 +159,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         return True
 
     def log(self, message):
-        self.logger.info("[{0}] {1}".format(self.socket.sessid, message))
+        self.logger.info("{0}: [{1}] {2}".format(datetime.now(),self.socket.sessid, message))
 
     def on_play(self, location):
         self.log('Received location: %s' % location)
