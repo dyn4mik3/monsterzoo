@@ -123,8 +123,9 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.selected_cards = []
         self.selected_cards_wild = []
         self.play_stack = []
+        self.players_in_game = [] # list ids of all players in game with you
         self.card = None
-        self.game = None
+        self.game = None # equal to the instance's specific game object
 
     def recv_disconnect(self):
         user_id = self.socket.sessid
@@ -211,6 +212,22 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.log ('Playing card from self.card %r' % self.card)
         self.card.play(player)
 
+    def on_selected_card_from_other_zoo(self, index):
+        player_id = self.socket.sessid
+        player_index = self.players.index(player_id)
+        if player_index == 0:
+            player = self.players[1]
+        elif player_index == 1:
+            player = self.players[0]
+        player = self.nicknames[player_id]
+        self.selected_card = index
+        card = player.zoo.cards[int(index)] # get card object from the index number
+        card.socket = self
+        self.selected_cards.append(card) # add cards to the list of selected cards
+        self.log ('Selected Card from Zoo is Now: %r %r' % (card, self.selected_card))
+        self.log ('Playing card from self.card %r' % self.card)
+        self.card.play(player)
+
     def on_buy(self, location):
         location = int(location)
         player_id = self.socket.sessid
@@ -258,7 +275,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
             self.broadcast_to_players(self.game.players,'empty', player.player_id)
             location = 0
             for card in cards: # render cards in hand
-                self.log('Rendering card with info %r, %r, %r, %r, %r, %r' % (player.player_id, card.name, card.cost, card.image, card.description, location))
+                #self.log('Rendering card with info %r, %r, %r, %r, %r, %r' % (player.player_id, card.name, card.cost, card.image, card.description, location))
                 self.broadcast_to_players(self.game.players,'render_card', player.player_id, card.name, card.cost, card.image, card.description, location)
                 location += 1
             self.broadcast_to_players(self.game.players, 'empty_zoo', player.player_id)
@@ -297,6 +314,15 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
             self.log('Player {%s} requested a card. {%r}' % (player_id, card))
             #self.broadcast_event('announcement', 'Player {%s} has the following cards: %r' % (player_id, player.hand.cards))
             self.broadcast_event('render_card', player_id, card.name, card.cost, card.image, card.description, location)
+            location += 1
+
+    def render_discard(self, player_id):
+        player = self.nicknames[player_id]
+        cards = player.hand.cards
+        self.emit('empty', player_id)
+        location = 0
+        for card in cards:
+            self.emit('render_discard', player_id, card.name, card.cost, card.image, card.description, location)
             location += 1
 
     def render_wild(self, wild):
@@ -390,6 +416,15 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.render_game()
         self.broadcast_to_players(self.game.players, 'turn', self.socket.sessid)
         #self.broadcast_event('turn', self.socket.sessid)
+
+    def on_discard(self, card_index):
+        # used when player is discarding right before end of turn
+        card_index = int(card_index)
+        user_id = self.socket.sessid
+        player = self.nicknames[user_id]
+        card = player.hand.cards.pop(card_index)
+        player.discard.add_to_bottom(card)
+        self.render_discard(player.player_id)
 
     def on_user_message(self, msg):
         self.log('User message: {0}'.format(msg))

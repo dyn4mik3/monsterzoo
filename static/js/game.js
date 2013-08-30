@@ -4,6 +4,7 @@ $(function() {
     var turn;
 
     $('#turn-player1').hide();
+    $('#discard-player1').hide();
 
     socket.on('connect', function() {
         $('#game').append($('<p>').text(this.socket.sessionid));
@@ -23,6 +24,7 @@ $(function() {
         if (player == this.socket.sessionid) {
             $('.play-this').hide();
             $('#turn-player1').hide();
+            $('#discard-player1').hide();
             $('#win-message').modal('toggle');
         }
         else {
@@ -39,12 +41,14 @@ $(function() {
         if (player == this.socket.sessionid) {
             turn = false;
             $('#turn-player1').hide();
+            $('#discard-player1').hide();
             $('.btn').hide();
         }
         else {
             turn = true;
             $('.btn').hide(); // hide all buttons
             $('#turn-player1').show(); // show the "end turn" button
+            $('#discard-player1').show();
             $('#player1 .play-this').show(); // show the "play this card" buttons
         };
     });
@@ -53,12 +57,18 @@ $(function() {
         if (turn == true) {
             $('.btn').hide();
             $('#turn-player1').show();
+            $('#discard-player1').show();
             $('#player1 .play-this').show();
         }
         else if (turn == false) {
             $('.btn').hide();
         };
     };
+
+    socket.on('hide_card', function(card_index) {
+        var card_id = '#player1card' + card_index;
+        $(card_id).hide();
+    });
 
     socket.on('announcement', function (msg) {
         $('#lines').append($('<p>').append($('<em>').text(msg)));
@@ -125,14 +135,16 @@ $(function() {
         '</div>' +
         '</div>';
 
-        var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
+        var card_layout = '<div class="card" id="player1card' + index_location +
+        '"><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
         '" height="80px"></p>' + card_text +
         '</div>' +
         '<div class="playbutton">' +
         '<button type="button" ' +
-        'name="' + index_location + '" class="btn btn-primary btn-mini play-this">Play This Card</button>' +
+        'name="' + index_location + 
+        '" class="btn btn-primary btn-mini play-this">Play This Card</button>' +
         '</div></div>';
         if (player == 'wild') {
             $('#wild').append(card_layout);
@@ -145,6 +157,36 @@ $(function() {
         };
         clear_buttons();
     });
+
+    socket.on('render_discard', function(player, card_name, card_cost, card_image, card_text, index_location) {
+        var card_back = '<div class="card cardback" style="background-color:#f79a2f;"><div class="corner top_left"><span class="number">' + 
+        '</span></div><div class="corner top_right"><span class="number">' + 
+        '</span></div><div class="card_image"><p><img src="/static/images/Logo.png" height="80px"></p>' +
+        '</div>' +
+        '</div>';
+
+        var card_layout = '<div class="card" id="player1card' + index_location +
+        '"><div class="corner top_left"><span class="number">' + card_name + 
+        '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
+        '</span></div><div class="card_image"><p><img src="' + card_image +
+        '" height="80px"></p>' + card_text +
+        '</div>' +
+        '<div class="playbutton">' +
+        '<button type="button" ' +
+        'name="' + index_location + 
+        '" class="btn btn-info btn-mini discard-this">Discard</button>' +
+        '</div></div>';
+        if (player == 'wild') {
+            $('#wild').append(card_layout);
+        }
+        else if (player == this.socket.sessionid) {
+            $('#player1').append(card_layout);
+        }
+        else {
+            $('#player2').append(card_back);
+        };
+    });
+
 
     socket.on('render_zoo', function(player, card_name, card_cost, card_image, card_text, index_location) {
         var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
@@ -205,6 +247,15 @@ $(function() {
         $('#player1-zoo .playbutton .btn').toggleClass('play-this pick-this');
         $('#player1-zoo .playbutton .btn').toggleClass('btn-primary btn-warning');
     });
+
+    socket.on('select_card_from_other_zoo', function(player, card_index) {
+        $('#player1 .playbutton .btn').hide();
+        $('#player2-zoo .play-this').html('Pick This Card');
+        $('#player2-zoo .playbutton .btn').show();
+        $('#player2-zoo .playbutton .btn').toggleClass('play-this pick-this');
+        $('#player2-zoo .playbutton .btn').toggleClass('btn-primary btn-warning');
+    });
+
 
     socket.on('select_card_from_wild', function(player, card_index) {
         $('#wild .playbutton .buy-this').hide(); // hide any buy this buttons

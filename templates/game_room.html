@@ -89,6 +89,7 @@
                             <div class="col-lg-8">
                             <h3 class="page-header">You
                             <button id="turn-player1" type="button" class="btn btn-danger btn-small">End Turn</button>
+                            <button id="discard-player1" type="button" class="btn btn-warning btn-small">Discard & End Turn</button>
                             </h3>
                                 <!-- Area for Player 1 Content -->
                                 <div id="player1">
@@ -186,6 +187,21 @@
             socket.emit('turn');
         });
 
+        // Bind to discard end turn button
+        $('#discard-player1').click(function() {
+            $('#player1-zoo .playbutton .btn').hide();
+            $('#player1 .playbutton .btn').show();
+            $('#player1 .play-this').html('Discard');
+            $('#player1 .playbutton .btn').toggleClass('play-this discard-this');
+            $('#player1 .playbutton .btn').toggleClass('btn-default btn-info');
+            $('#discard-player1').hide();
+        });
+
+        // Bind to discard this buttons
+        $('.row').on('click', '#player1 .discard-this', function(event) {
+            socket.emit('discard', this.name);
+        });
+
         // Bind the card play this buttons
         $('.row').on('click', '#player1 .play-this', function(event) {
             console.log(this.name);
@@ -203,6 +219,12 @@
         $('.row').on('click', '#player1-zoo .pick-this', function(event) {
             console.log("Clicked on a pick this button in the Zoo.");
             socket.emit('selected_card_from_zoo', this.name);
+        });
+
+        // Bind the select card other zoo buttons
+        $('.row').on('click', '#player2-zoo .pick-this', function(event) {
+            console.log("Clicked on a pick this button in the Zoo.");
+            socket.emit('selected_card_from_other_zoo', this.name);
         });
 
         // Bind the select card zoo buttons

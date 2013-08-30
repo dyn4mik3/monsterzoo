@@ -65,7 +65,8 @@ class Card(object):
         self.socket.emit('select_card_from_wild', player.player_id)
 
     def get_other_player(self, player):
-        player_index = self.socket.players.index(player)
+        # this is buggy
+        player_index = self.socket.game.players.index(player)
         if player_index == 0:
             return self.socket.players[1]
         elif player_index == 1:
