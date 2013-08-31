@@ -214,14 +214,15 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
 
     def on_selected_card_from_other_zoo(self, index):
         player_id = self.socket.sessid
-        player_index = self.players.index(player_id)
-        if player_index == 0:
-            player = self.players[1]
-        elif player_index == 1:
-            player = self.players[0]
         player = self.nicknames[player_id]
+        player_index = self.game.players.index(player)
+        opponent = None
+        if player_index == 0:
+            opponent = self.players[1]
+        elif player_index == 1:
+            opponent = self.players[0]
         self.selected_card = index
-        card = player.zoo.cards[int(index)] # get card object from the index number
+        card = opponent.zoo.cards[int(index)] # get card object from the index number
         card.socket = self
         self.selected_cards.append(card) # add cards to the list of selected cards
         self.log ('Selected Card from Zoo is Now: %r %r' % (card, self.selected_card))

@@ -617,6 +617,77 @@ class OhnoZoogly(Card):
             ohno = player.hand.cards.index(self)
             self.select_card_from_zoo(player, ohno)
 
+class ViktorZoogly(Card):
+    def __init__(self):
+        self.name = 'Viktor Zoogly'
+        self.description = 'Gain food equal to the number of monsters in your opponents Zoo.'
+        self.card_type = "Monster"
+        self.card_family = "Zoogly"
+        self.cost = 2
+        self.image = "/static/images/Zoogly.png"
+        self.socket = '' # this will hold the socketio object
+    
+    def play(self, player):
+        opponent = self.get_other_player(player)
+        player.food += len(opponent.zoo.cards)
+        self.discard(player)
+        self.socket.log('Played Viktor Zoogly')
+        self.socket.render_game()
+
+class BossiZoogly(Card):
+    def __init__(self):
+        self.name = 'Bossi Zoogly'
+        self.description = '+2 Food. Force other player to discard a Monster from their Zoo.'
+        self.card_type = "Monster"
+        self.card_family = "Zoogly"
+        self.cost = 4
+        self.image = "/static/images/Zoogly.png"
+        self.socket = '' # this will hold the socketio object
+    
+    def play(self, player):
+        if self.socket.selected_cards:
+            card = self.get_selected_card()
+            self.socket.selected_cards = []
+            opponent = self.get_other_player(player)
+            opponent.zoo.remove_card(card)
+            opponent.discard.add_to_bottom(card)
+            self.discard(player)
+            player.food += 2
+            self.socket.log('Played Bossi Zoogly')
+            self.socket.play_stack.remove(self)
+            self.socket.render_game()
+        else:
+            self.socket.log('Getting card from other player zoo')
+            self.socket.play_stack.append(self)
+            self.socket.emit('select_card_from_other_zoo', player.player_id, 1)
+        
+ 
+class SluggoZoogly(Card):
+    def __init__(self):
+        self.name = 'Sluggo Zoogly'
+        self.description = 'Move a random Monster in opponents Zoo back to opponents hand'
+        self.card_type = "Monster"
+        self.card_family = "Zoogly"
+        self.cost = 2
+        self.image = "/static/images/Zoogly.png"
+        self.socket = '' # this will hold the socketio object
+    
+    def play(self, player):
+        if self.socket.selected_cards:
+            card = self.get_selected_card()
+            self.socket.selected_cards = []
+            opponent = self.get_other_player(player)
+            opponent.zoo.remove_card(card)
+            opponent.hand.add_to_bottom(card)
+            self.discard(player)
+            self.socket.log('Played Sluggo Zoogly')
+            self.socket.play_stack.remove(self)
+            self.socket.render_game()
+        else:
+            self.socket.log('Getting card from other player zoo')
+            self.socket.play_stack.append(self)
+            self.socket.emit('select_card_from_other_zoo', player.player_id, 1)
+ 
 class ZookeeZoogly(Card):
     def __init__(self):
         self.name = 'Zookee Zoogly'
@@ -730,7 +801,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [BossiZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -809,7 +880,13 @@ class Wild(Player):
                 ParksOogly(),
                 ParksOogly(),
                 FifiOogly(),
-                FifiOogly()
+                FifiOogly(),
+                SluggoZoogly(),
+                SluggoZoogly(),
+                ViktorZoogly(),
+                ViktorZoogly(),
+                BossiZoogly(),
+                BossiZoogly(),
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
