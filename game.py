@@ -88,6 +88,30 @@ def room():
     """
     return render_template('game_room.html')
 
+@app.route('/cards')
+def cards():
+    return render_template('cards.html')
+
+@app.route('/story')
+def story():
+    return render_template('story.html')
+
+@app.route('/media')
+def media():
+    return render_template('media.html')
+
+@app.route('/game')
+def game():
+    return render_template('game.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/rules')
+def rules():
+    return render_template('rules.html')
+
 class PlayerMixin(object):
     def broadcast_to_player(self, player_id, event, *args):
         pkt = dict(type="event", name=event, args=args, endpoint=self.ns_name)
@@ -104,8 +128,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     nicknames = {} # stores a dictionary with sessionids as key, Player objects as values
     players = [] # stores a list of Player objects
     #game = None
-    end_turn = False
-    login_count = 0
+    #end_turn = False
+    #login_count = 0
     player_games = {}
     player_queue = []
     game_list = []

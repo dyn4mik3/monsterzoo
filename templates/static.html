@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+        <meta charset="utf-8">
+        <title>{% block title %}{% endblock title %} Monster Zoo</title>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/css/chat.css">
+
+	</head>
+	<body>
+        <div id="wrap">
+            <div class="navbar navbar-fixed-top">
+                <div class="container">
+                    <a class="navbar-brand" href="/">Home</a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav navbar-nav">
+                            <li><a href="{{ url_for('room') }}">Start a Game</a></li>
+                            <li><a href="{{ url_for('game') }}">Game</a><li>
+                            <li><a href="{{ url_for('rules') }}">Rules</a><li>
+                            <li><a href="{{ url_for('cards') }}">Cards</a><li>
+                            <li><a href="{{ url_for('story') }}">Story</a><li>
+                            <li><a href="{{ url_for('media') }}">Media</a><li>
+                            <li><a href="{{ url_for('about') }}">About</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                {% block content %} {% endblock content %}
+            </div>
+        </div>
+        <div id="footer">
+            <div class="container">
+                <p class="text-muted credit"><code>Thanks for testing! Please send feedback to michael@rubycowgames.com</code></p>
+            </div>
+        </div>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/js/bootstrap.min.js"></script>
+	</body>
+</html>

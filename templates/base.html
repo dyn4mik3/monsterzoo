@@ -15,7 +15,12 @@
                     <div class="nav-collapse collapse">
                         <ul class="nav navbar-nav">
                             <li><a href="{{ url_for('room') }}">Start a Game</a></li>
-                            <li><a href="#">About</a></li>
+                            <li><a href="{{ url_for('game') }}">Game</a><li>
+                            <li><a href="{{ url_for('rules') }}">Rules</a><li>
+                            <li><a href="{{ url_for('cards') }}">Cards</a><li>
+                            <li><a href="{{ url_for('story') }}">Story</a><li>
+                            <li><a href="{{ url_for('media') }}">Media</a><li>
+                            <li><a href="{{ url_for('about') }}">About</a></li>
                         </ul>
                     </div>
                 </div>
