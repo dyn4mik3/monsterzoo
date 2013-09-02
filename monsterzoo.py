@@ -1031,14 +1031,14 @@ class Game(object):
                 if card.cost:
                     score += card.cost
             player.score = score
-            if player.score >= 20:
+            if player.score >= 30:
                 self.state = 'end'
                 print 'Game Over'
             print "Player %r Score: %r" % (player, player.score)
 
     def play_game(self):
         high_score = 0
-        while high_score < 20:
+        while high_score < 30:
             for player in self.players:
                 print "Player %r's turn" % player
                 self.turn(player)
