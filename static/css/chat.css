@@ -58,10 +58,10 @@ code {
 
 /* CARD STUFF */
 .playbutton {
-    width: 120px;
-    float:left;
+    /*width: 120px;*/
+    /* float:left; */
     text-align:center;
-    margin: 0 8px 8px 0;
+    margin: 0 auto;
 }
 .card { 
     background-color: #fff; 
@@ -72,10 +72,10 @@ code {
     -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
     float: left; 
-    height: 280px; 
+    height: 300px; 
     margin: 0 8px 8px 0; 
     position: relative; 
-    width: 120px; 
+    width: 140px; 
     z-index: 2; 
 }
 
@@ -88,22 +88,33 @@ code {
     -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
     float: left; 
-    height: 120px; 
+    height: 140px; 
     margin: 0 8px 8px 0; 
     position: relative; 
-    width: 120px; 
+    width: 140px; 
     z-index: 2; 
 }
 
 .card .top_right {
     color:orange;
-    position:absolute;
-    right:10px; top:12px;
+    float:right;
+    margin-right:10px;
+    margin-top:12px;
+    margin-bottom:0px;
+    /* float:right;
+    width:30px;
+    margin-right:10px;
+    margin-top:12px;*/
+    /*position:absolute;
+    right:10px; top:12px;*/
 }
 
 .card .top_left {
-    position:absolute;
-    left:10px; top:12px;
+    margin-top:12px;
+    margin-left:10px;
+    margin-bottom:0px;
+    /* position:absolute;
+    left:10px; top:12px; */
 }
 
 .card .number {
@@ -111,11 +122,11 @@ code {
 font-weight:bold;
 }
 .card .card_image {
-text-align:center;margin-left:8px;margin-right:8px;margin-top:80px;
+text-align:center;margin-left:8px;margin-right:8px;margin-top:5px;
 }
 
 .cardback .card_image{
-text-align:center;margin-left:8px;margin-right:8px;margin-top:20px;
+text-align:center;margin-left:8px;margin-right:8px;margin-top:30px;
 }
 
 /* CHAT BOX */

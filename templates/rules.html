@@ -3,25 +3,230 @@
 {% block content %}
 <div class="page-header">
     <img width="125" src="/static/images/large-logo.png" class="pull-right">
-    <h1>Rules</h1>
+    <h1>Rules for the Printed Game</h1>
 </div>
-<h2>Goal</h2>
-<p>Be the first player to build a Zoo worth 30 points</p>
-<h2>How to Play</h2>
-<p>During your turn:
-<ul>
-    <li>Play any number of cards from your hand</li>
-    <li>Use Food to catch cards from The Wild (middle set of cards).</li>
-    <li>Caught cards will be placed into your discard pile.</li>
-    <li>When you run out of cards in your deck, your discard pile will become your new deck.</li>
-    <li>Move Monsters into your Zoo for points.</li>
-    <li>Cards with "Zoo Effects" give you a bonus at the beginning of your turn.</li>
-</ul>
-</p>
+<div class="row" data-spy="scroll" data-target="#navbar-sidebar">
+   <div class="col-lg-9">
+    <h2 id="overview">Overview</h2>
+    <p>The Master Monster Zookeeper, Zaniki Zoogly, is retiring and is looking to hire 
+    his replacement. You are one of the few promising Zookeepers that have caught his 
+    eye. You have dreamt of this day, now it’s your chance to shine!</p>
 
-<h2>End of turn:</h2>
+    <p>Zaniki has given you a brand new <b>Zoo</b> to manage. You need to fill your Zoo with 
+    all sorts of amazing Monsters. To do this, you will catch <b>Monsters</b> from <b>The Wild</b> 
+    and look after them in your Zoo. Every now and then, your Zoo will be part of an 
+    Event. If you’ve built a great Zoo, you will be rewarded after the Event! </p>
 
-<p>Draw until you have at least 5 cards in your hand.</p>
-<h2>Playtest Notes:</h2>
-<p>This is a buggy play test system and the game may potentially break on you. Many of the cards/features from the game are not fully developed in the online version yet. Thanks for testing!</p>
+    <p>Be careful though, other Zookeepers are trying to stop you as they build their 
+    own Zoos.</p>
+
+    <p>The Zookeeper who fills their zoo the fastest will be chosen as Zaniki’s 
+    replacement and earn the title of <b>Master Monster Zookeeper!</b></p>
+
+    <h2 id="objectofgame">Object of the Game</h2>
+    <p>To win, you must either:</p>
+    <ul>
+        <li>Be the first player to build a Zoo worth 30 points</li>
+        OR
+        <li>Be the first player to build a Zoo with any 2 Oogly Monsters, any 2 
+        Boogly Monsters, and any 2 Zoogly Monsters.</li>
+    </ul>
+
+    <p>Monster cards are worth points equal to their food cost, shown in the upper 
+    left hand corner. Oogly, Boogly, and Zoogly Monsters are types of Monsters.</p>
+
+    <h2 id="gamecontents">Game Contents</h2>
+    <a name="gamecontents"></a>
+
+    <p><em>4 Personal Player Decks</em>, each containing:</p>
+
+    <p>6 Dirty Sock Cards</br>
+    4 Zookee Zoogly Cards</p>
+
+    <p><em>“The Wild” Deck:</em></p>
+                        
+    <p>20 Oogly Monster Cards (2 of each Oogly Monster)<br/>
+    20 Boogly Monster Cards (2 of each Boogly Monster)<br/>
+    20 Zoogly Monster Cards (2 of each Zoogly Monster)<br/>
+    8 Event Cards (1 of each Event Card)<br/>
+    6 Food Cards (2 of each Food Card)</p>
+
+    <h2 id="setup">Setup</h2>
+    <a name="setup"></a>
+
+    <h3>Player Decks:</h3>
+    <ul>
+        <li>Each player starts with a personal deck consisting of 6 Dirty Socks 
+        (a food) and 4 Zookee Zoogly (a monster) cards.</li>
+        <li>Remove additional copies of Dirty Socks and Zookee Zoogly. Do not 
+        use them during the game.</li>
+        <li>Each player shuffles his deck and draws 5 cards (leaving 5 cards in 
+        his deck).</li>
+    </ul>
+
+    <h3>The Wild:</h3>
+    <ul>
+        <li>Shuffle all of the other cards face down to form The Wild Deck.</li>
+        <li>From The Wild Deck, flip 5 cards face up in a row between all players. This forms The Wild.</li>
+        <li>Reserve space next to The Wild Deck for the Clearing. After Event cards are played, they go to the Clearing.</li>
+    </ul>
+
+    <p>The player who has most recently seen a real monster goes first. If nobody has seen a real monster, then the youngest player starts.</p>
+
+    <p>Players take turns clockwise.</p>
+
+    <img class="img-responsive" src="/static/images/table.png">
+
+    <h2 id="cardtypes">Card Types</h2>
+
+    <p>There are three types of cards in the game: Food, Monsters, and Events.</p>
+
+    <h3>Food</h3>
+
+    <img class="img-responsive" src="/static/images/food-card.png" width="300px">
+
+    <p>Food allows you to aquire Monsters or more Food.</p>
+    
+    <p>To catch Monsters or Food from The Wild, play Food cards (and/or Monster 
+    cards that give you Food) equal to the food cost of the Monster or Food card 
+    you are acquiring. The amount needed to gain a Monster or Food card is located 
+    in the upper left corner of the card.</p>
+
+    <p>Cards gained from The Wild always go directly to your discard pile. Draw 
+    a new card from The Wild Deck to replace the empty spot left by the card you 
+    just caught.</p>
+    
+    <h3>Monsters</h3>
+
+    <img class="img-responsive" src="/static/images/monster-card.png" width="300px">
+
+    <p>When you play a Monster card from your hand, you gain the effect listed 
+    on the card. It stays in front of you until the end of the turn, and then 
+    it goes to your discard pile.</p>
+
+    <p>There are three types of Monsters:</p>
+    <ul>
+        <li>Oogly (Purple Background) - These monsters are festive and love food. 
+        Playing Oogly cards will typically give you food to help catch Monsters 
+        from The Wild.</li>
+        <li>Boogly (Red Background) - These monsters are fast and quick. Playing 
+        Boogly cards will usually help you draw more cards.</li>
+        <li>Zoogly (Blue Background) - These monsters help manage your Zoo. 
+        Playing Zoogly cards will generally help you move Monsters into your Zoo.</li>
+    </ul>
+
+    <h3>Events</h3>
+
+    <img class="img-responsive" src="/static/images/event-card.png" width="300px">
+
+    <p>Events are special occasions that happen at your Zoo. Event cards are only 
+    found in The Wild Deck. When an Event card is drawn from The Wild Deck, follow 
+    its instructions immediately, then place it in the Clearing. Draw a new card 
+    from The Wild Deck and place it in the open spot.</p>
+
+    <h2 id="yourzoo">Your Zoo</h2>
+
+    <p>Your Zoo is a special area in front of you where you will be placing 
+    Monster cards. Monster cards that are placed in your Zoo stay there until the 
+    end of the game, unless they are forced out by another card’s effect. Monster
+    cards in your Zoo (not your hand or discard or pile) are with points equal to 
+    their food cost.</p>
+
+    <h2 id="movingmonsters">Moving Monsters to Your Zoo</h2>
+
+    <p>To move a Monster to your Zoo, you’ll need the help of a Monster with the 
+    effect allowing you to move a Monster to your Zoo. Play the Monster card with 
+    the effect in front of you and then take a different Monster from your hand 
+    and place that card into your Zoo.</p>
+
+    <p>For example, you will start the game with 4 Zookee Zoogly cards in your 
+    deck. Zookee Zoogly has the listed effect “Move a monster card from your hand 
+    into your Zoo.” If you had a hand with a Zookee Zoogly and a Boo Boogly 
+    (another Monster card), you could play Zookee Zoogly, and then move Boo Boogly 
+    into your Zoo.</p>
+
+    <h2 id="zooeffects">Playing With Zoo Effects</h2>
+
+    <p>Some Monsters have a Zoo Effect that you can use once per turn if the 
+    Monster is in your Zoo. To use a zoo effect, follow the directions on the 
+    Monster card that is in your zoo.</p>
+
+    <h2 id="play">Play</h2>
+
+    <p>General Rules:</p>
+    <ul>
+        <li>At any time, if your personal deck is empty and you need to draw a 
+        card, reshuffle your discard pile to replenish your deck.</li>
+        <li>Cards played during your turn go to your discard pile.</li>
+        <li>Food and Monsters you catch during your turn are placed in your discard pile.</li>
+        <li>Whenever a card leaves The Wild, replace it immediately with a new card from The Wild Deck. There should always be 5 cards in The Wild.</li>
+        <li>Event cards have effects when they enter The Wild. The effects of these cards occur immediately, including at the beginning of the game when The Wild is first set up. </li>
+        <li>Event cards are moved to the Clearing after their effects are played.</li>
+        <li>If the card text ever contradicts the rules, follow the card text instead.</li>
+    </ul>
+
+    <p>Turn Breakdown:</p>
+    <ol>
+        <li>Use Zoo Effects (if there are any Monsters with Zoo Effects in your Zoo).</li>
+        <li>Play any number of cards from your hand. Follow the listed effect on the cards. Place played cards in your discard pile. Monsters in your Zoo remain there and are not discarded.</li>
+        <li>At any time during your turn, you may use Food gained from your played cards to catch Monsters or Food from The Wild and place them in your discard pile.</li>
+        <li>Continue playing cards from your hand until you decide to stop or have no more cards in your hand.</li>
+        <li>Discard as many cards as you want. Draw until you have 5 cards. If you have more than 5 cards at the end of your turn, discard until you have 5 cards in your hand.</li>
+    </ol>
+    <strong>OR</strong>
+    <ol>
+        <li>Forfeit your turn in order to swap a Monster card from your hand for a Monster card from The Wild.</li>
+    </ol>
+
+    <p>To play a card from your hand, place the card face up in front of you, announce 
+    its effect, and follow the instructions on the card.</p>
+
+    <h2 id="events">Dealing with Events</h2>
+
+    <p>Every now and then, an Event card will be drawn from The Wild Deck. When 
+    this happens, immediately follow the instructions on the card. Events will
+    usually affect all players.</p>
+
+    <p>Place the Event card in the Clearing after all players are done following 
+    the card’s instructions. Draw a new card from The Wild Deck to replace any 
+    empty spot in The Wild.</p>
+
+    <h2 id="endingturn">Ending Your Turn</h2>
+
+    <p>When you are done playing cards, take all the cards you played this turn 
+    (Monsters and Food) and put them face up in your discard pile. Monster cards 
+    in your Zoo are not considered played cards. Leave them in the Zoo.</p>
+
+    <p>Discard as many cards as you want. Draw until you have 5 cards. If you have 
+    more than 5 cards at the end of your turn, discard until you have 5 cards in 
+    your hand. If you run out of cards in your deck to draw from, shuffle your 
+    discard pile to create a new deck. Draw cards from the new deck.</p>
+
+    <h2 id="gameend">Game End</h2>
+
+    <p>The game is over as soon as one player has 30 points worth of monsters in 
+    their Zoo, or as soon as one player has two of each kind of monster (Oogly, 
+    Boogly, and Zoogly) in their Zoo. That player is declared Master Monster 
+    Zookeeper and wins the game!</p>
+    </div>
+    <div id="navbar-sidebar" class="col-lg-3">
+        <div style="position:fixed;" class="well">
+        <ul class="nav">
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#objectofgame">Object of Game</a></li>
+            <li><a href="#gamecontents">Game Contents</a></li>
+            <li><a href="#setup">Setup</a></li>
+            <li><a href="#cardtypes">Card Types</a></li>
+            <li><a href="#yourzoo">Your Zoo</a></li>
+            <li><a href="#movingmonsters">Moving Monsters</a></li>
+            <li><a href="#zooeffects">Zoo Effects</a></li>
+            <li><a href="#play">How to Play</a></li>
+            <li><a href="#events">Events</a></li>
+            <li><a href="#endturn">Ending Your Turn</a></li>
+            <li><a href="#gameend">Game End</a></li>
+        </ul>
+        </div>
+    </div>
+</div>
+
 {% endblock content %}

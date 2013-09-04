@@ -25,6 +25,7 @@ $(function() {
             $('.play-this').hide();
             $('#turn-player1').hide();
             $('#discard-player1').hide();
+            $('#wild .btn').hide();
             $('#win-message').modal('toggle');
         }
         else {
@@ -109,9 +110,9 @@ $(function() {
 
     socket.on('render_wild', function(player, card_name, card_cost, card_image, card_text, index_location) {
         var button = '<button type="button" ' + 'id="wild' + index_location +'" ' +
-        'name="' + index_location + '" class="btn btn-primary btn-mini buy-this">Buy This Card</button>';
-        var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
-        '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
+        'name="' + index_location + '" class="btn btn-primary btn-xs buy-this">Buy This Card</button>';
+        var card_layout = '<div class="card"><div class="corner top_right"><span class="number">' + card_cost + 
+        '</span></div><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
         '" height="80px"></p>' + card_text +
         '</div><div class="playbutton">'; 
@@ -136,15 +137,15 @@ $(function() {
         '</div>';
 
         var card_layout = '<div class="card" id="player1card' + index_location +
-        '"><div class="corner top_left"><span class="number">' + card_name + 
-        '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
+        '"><div class="corner top_right"><span class="number">' + card_cost + 
+        '</span></div><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
         '" height="80px"></p>' + card_text +
         '</div>' +
         '<div class="playbutton">' +
         '<button type="button" ' +
         'name="' + index_location + 
-        '" class="btn btn-primary btn-mini play-this">Play This Card</button>' +
+        '" class="btn btn-primary btn-xs play-this">Play This Card</button>' +
         '</div></div>';
         if (player == 'wild') {
             $('#wild').append(card_layout);
@@ -166,15 +167,15 @@ $(function() {
         '</div>';
 
         var card_layout = '<div class="card" id="player1card' + index_location +
-        '"><div class="corner top_left"><span class="number">' + card_name + 
-        '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
+        '"><div class="corner top_right"><span class="number">' + card_cost + 
+        '</span></div><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
         '" height="80px"></p>' + card_text +
         '</div>' +
         '<div class="playbutton">' +
         '<button type="button" ' +
         'name="' + index_location + 
-        '" class="btn btn-info btn-mini discard-this">Discard</button>' +
+        '" class="btn btn-info btn-xs discard-this">Discard</button>' +
         '</div></div>';
         if (player == 'wild') {
             $('#wild').append(card_layout);
@@ -189,14 +190,14 @@ $(function() {
 
 
     socket.on('render_zoo', function(player, card_name, card_cost, card_image, card_text, index_location) {
-        var card_layout = '<div class="card"><div class="corner top_left"><span class="number">' + card_name + 
-        '</span></div><div class="corner top_right"><span class="number">' + card_cost + 
+        var card_layout = '<div class="card"><div class="corner top_right"><span class="number">' + card_cost + 
+        '</span></div><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
         '" height="80px"></p>' + card_text +
         '</div>' +
         '<div class="playbutton">' +
         '<button type="button" ' +
-        'name="' + index_location + '" class="btn btn-primary btn-mini play-this">Play This Card</button>' +
+        'name="' + index_location + '" class="btn btn-primary btn-xs play-this">Play This Card</button>' +
         '</div></div>';
         if (player == this.socket.sessionid) {
             $('#player1-zoo').append(card_layout);
@@ -262,7 +263,7 @@ $(function() {
         var index_location = 0;
         $('#wild .playbutton').each(function(index_location) {
             var button = '<button type="button" ' + 'id="wild' + index_location +'" ' +
-            'name="' + index_location + '" class="btn btn-warning btn-mini select-this">Select This</button>';
+            'name="' + index_location + '" class="btn btn-warning btn-xs select-this">Select This</button>';
             $(this).append(button);
             index_location = index_location + 1;
         });
