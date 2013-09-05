@@ -1,4 +1,5 @@
 *.py[cod]
+*.sh
 
 # log files
 *.log
