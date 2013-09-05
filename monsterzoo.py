@@ -802,7 +802,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [BossiZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
