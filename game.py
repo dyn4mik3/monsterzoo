@@ -105,6 +105,10 @@ def media():
 def game():
     return render_template('game.html')
 
+@app.route('/printandplay')
+def printandplay():
+    return render_template('print_and_play.html')
+
 @app.route('/about')
 def about():
     return render_template('about.html')
