@@ -11,7 +11,7 @@
     $(function() {
         $('#login').submit(function() {
             socket.emit('login', $('#username').val())
-            return false;
+            return true;
         });
     });
 </script>

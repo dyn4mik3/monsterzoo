@@ -22,6 +22,7 @@ class Card(object):
             player.food += len(player.zoo.cards)
         player.hand.remove_card(card)
         player.zoo.add_to_bottom(card)
+        return card
 
     def discard(self, player):
         hand = player.hand
@@ -734,7 +735,7 @@ class ZoomiZoogly(Card):
     def play(self, player):
         self.socket.log('In the Play Loop for Zoomi Zoogly')
         if self.socket.selected_cards:
-            self.move_selected_card_to_zoo(player)
+            card = self.move_selected_card_to_zoo(player)
             if card.card_family == "Oogly":
                 player.deal(2)
             self.discard(player)

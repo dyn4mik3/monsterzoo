@@ -48,7 +48,8 @@ def index():
     """
     Homepage - Lists all game rooms and users.
     """
-    return render_template('game_rooms.html', live_rooms = live_rooms, users=users)
+    #return render_template('game_rooms.html', live_rooms = live_rooms, users=users)
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -59,7 +60,7 @@ def login():
         session['username'] = request.form['username']
         flash('You are now logged in as %s' % session['username'])
         users.append(session['username'])
-        return redirect(url_for('index'))
+        return redirect(url_for('room'))
     return render_template('login.html')
 
 @app.route('/logout')
@@ -111,6 +112,10 @@ def about():
 @app.route('/rules')
 def rules():
     return render_template('rules.html')
+
+@app.route('/credits')
+def credits():
+    return render_template('credits.html')
 
 class PlayerMixin(object):
     def broadcast_to_player(self, player_id, event, *args):

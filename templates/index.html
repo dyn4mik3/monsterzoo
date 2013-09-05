@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-lg-4 col-lg-offset-4 text-center">
+            <img src="/static/images/large-logo.png" class="img-responsive">
+            <p class="lead">Catch Monsters for your Zoo! You're the new Zookeeper.</p>
+            <p class="lead"><a href="{{ url_for('room') }}" class="btn btn-lg btn-success">Start a Game</a></p>
+            <p class="text-muted"><small>* Game will start after 2 players have joined</small></p>
+        </div>
+    </div>
+{% endblock content %}

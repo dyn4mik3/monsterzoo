@@ -16,15 +16,16 @@
                         <a class="navbar-brand" href="/">Home</a>
                     </div>
                     <div class="collapse navbar-collapse">
+                        <a class="btn btn-default navbar-left navbar-btn" href="{{ url_for('room') }}">Start a Game</a>
                         <ul class="nav navbar-nav">
-                            <li><a href="{{ url_for('room') }}">Start a Game</a></li>
                             <li><a href="{{ url_for('game') }}">Game</a><li>
                             <li><a href="{{ url_for('rules') }}">Rules</a><li>
                             <li><a href="{{ url_for('cards') }}">Cards</a><li>
                             <li><a href="{{ url_for('story') }}">Story</a><li>
                             <li><a href="{{ url_for('media') }}">Media</a><li>
-                            <li><a href="{{ url_for('about') }}">About</a></li>
+                            <li><a href="{{ url_for('credits') }}">Credits</a></li>
                         </ul>
+                            <p class="navbar-text pull-right">Monster Zoo is a Casual Deck Building Card Game</p>
                     </div>
                 </div>
             </div>
@@ -34,7 +35,7 @@
         </div>
         <div id="footer">
             <div class="container">
-                <p class="text-muted credit"><code>Thanks for testing! Please send feedback to michael@rubycowgames.com</code></p>
+                <p class="text-danger credit"><span class="glyphicon glyphicon-warning-sign"></span> Warning. This is a beta version and may break (especially in IE)  while you are playing. Thanks for testing! Please send feedback to michael@rubycowgames.com</p>
             </div>
         </div>
         <script src="//code.jquery.com/jquery.js"></script>
