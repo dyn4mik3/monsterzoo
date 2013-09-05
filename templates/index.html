@@ -6,7 +6,40 @@
             <img src="/static/images/large-logo.png" class="img-responsive">
             <p class="lead">Catch Monsters for your Zoo! You're the new Zookeeper.</p>
             <p class="lead"><a href="{{ url_for('room') }}" class="btn btn-lg btn-success">Start a Game</a></p>
-            <p class="text-muted"><small>* Game will start after 2 players have joined</small></p>
+            <p class="text-muted"><small>* Read the <a data-toggle="modal" href="#rules"><code>quickplay rules</code></a>. Game starts after 2 players join.</small></p>
+                <div class="modal fade" id="rules">
+                    <div class="modal-dialog">
+                        <div class="modal-content text-left">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h3 class="modal-title">Game Rules</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>Monster Zoo is a deckbuilding game for 2-4 players.</p>
+                                <p><b>Goal</b></p>
+                                <p>Be the first player to build a Zoo worth 30 points.</p>
+                                <p><b>How to Play</b></p>
+                                <p>During your turn:</p>
+                                <p><ul>
+                                    <li>Play any number of cards from your hand.</li>
+                                    <li>Use Food to catch cards from The Wild (middle set of cards).</li>
+                                    <li>Caught cards will be placed into your discard pile. When you run out of cards in your deck, your discard pile will become your new deck.</li>
+                                    <li>Move Monsters into your Zoo for points.</li>
+                                    <li>Card with "Zoo Effects" give you a bonus at the beginning of your turn.</li>
+                                </ul></p>
+                                <p>End of turn:</p>
+                                <p><ul>
+                                    <li>Draw until you have at least 5 cards in your hand.</li>
+                                </ul></p>
+                                <p><b>Playtest Notes:</b></p>
+                                <p>This is a buggy play test system and the game may potentially break on you. Many of the cards/features from the game are not fully developed in the online version yet. Thanks for testing!</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div> <!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /modal -->
         </div>
     </div>
 {% endblock content %}
