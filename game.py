@@ -212,6 +212,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         card.play(player)
         self.log('Trying to play card %s at index location %s' % (card, location))
         self.log("Game is %r" % self.game)
+        username = self.session['username']
+        self.broadcast_to_players(self.game.players, 'play-update', username, "Played %s. (%s)" % (card.name, card.description))
         #self.render(player_id)
         #self.render_game()
 
@@ -269,6 +271,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         wild = self.game.wild
         card = wild.hand.cards[location]
         self.log('Buying card %r' % card)
+        self.broadcast_to_players(self.game.players, 'play-update', self.session['username'], "Bought %s. (%s)" % (card.name, card.description))
         modified_card_cost = max(0,(card.cost - player.food_discount))
         if modified_card_cost <= player.food:
             player.food = player.food - modified_card_cost
@@ -449,6 +452,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.play_stack = [] # rest play stack
         self.render_game()
         self.broadcast_to_players(self.game.players, 'turn', self.socket.sessid)
+        self.broadcast_to_players(self.game.players, 'play-update', 'Game Event', 'End of Turn')
         #self.broadcast_event('turn', self.socket.sessid)
 
     def on_discard(self, card_index):

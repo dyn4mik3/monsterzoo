@@ -87,6 +87,16 @@ $(function() {
         }, 10);
     };
 
+    socket.on('play-update', playupdate);
+
+    function playupdate (from, msg) {
+        $('#play-lines').append($('<p>').append($('<b style="margin-right:2px;">').text(from), msg));
+        setTimeout(function() {
+            $("#play-lines").scrollTop($("#play-lines")[0].scrollHeight);
+        }, 10);
+    };
+
+
     socket.on('empty', function(player) {
         if (player == 'wild') {
             $('#wild').empty();
