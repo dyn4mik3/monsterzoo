@@ -51,6 +51,10 @@ def index():
     #return render_template('game_rooms.html', live_rooms = live_rooms, users=users)
     return render_template('index.html')
 
+@app.route('/robots.txt')
+def robots():
+    return app.send_static_file('robots.txt')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """
