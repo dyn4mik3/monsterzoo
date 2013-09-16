@@ -24,6 +24,7 @@ from logging.handlers import RotatingFileHandler
 app = Flask(__name__)
 app.debug = True
 handler = RotatingFileHandler('console.log', maxBytes=1000000, backupCount=5)
+
 handler.setLevel(logging.INFO)
 app.logger.addHandler(handler)
  
@@ -139,6 +140,7 @@ class PlayerMixin(object):
 
 class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     nicknames = {} # stores a dictionary with sessionids as key, Player objects as values
+    usernames = {} # stores a dictionary with sessionids as key, player login name objects as values    
     players = [] # stores a list of Player objects
     #game = None
     #end_turn = False
@@ -147,10 +149,11 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     player_queue = []
     game_list = []
 
-    def initialize(self):
+    def initialize(self, username):
         user_id = self.socket.sessid
         self.emit('userid', user_id)
         self.nicknames[user_id] = Player(user_id)
+        self.usernames[user_id] = username
         self.logger = app.logger
         self.log("Socketio session started")
         self.log("Nicknames data: %r" % self.nicknames)
@@ -178,7 +181,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         # try removing player from self.players
         try:
             self.log("self.session['username'] is set to %s" % self.session['username'])
-            username = self.session['username']
+            username = self.usernames[user_id]
             self.broadcast_event('announcement','%s has left' % username)
             self.log('Username %s has left' % username)
             self.log('Trying to remove player ID %s from the players list' % user_id)
@@ -203,7 +206,11 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         return True
 
     def log(self, message):
-        self.logger.info("{0}: [{1}] {2}".format(datetime.now(),self.socket.sessid, message))
+        # 20130906:LyV: Could not figure out why self does not have the logger object.
+        #   So, for now use the application logging facility to log.
+        #
+        #self.logger.info("{0}: [{1}] {2}".format(datetime.now(),self.socket.sessid, message))
+        app.logger.info("{0}: [{1}] {2}".format(datetime.now(),self.socket.sessid, message))
 
     def on_play(self, location):
         self.log('Received location: %s' % location)
@@ -216,7 +223,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         card.play(player)
         self.log('Trying to play card %s at index location %s' % (card, location))
         self.log("Game is %r" % self.game)
-        username = self.session['username']
+        username = self.usernames[user_id]
         self.broadcast_to_players(self.game.players, 'play-update', username, "Played %s. (%s)" % (card.name, card.description))
         #self.render(player_id)
         #self.render_game()
@@ -405,8 +412,15 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
 
     def on_login(self, username):
         self.log('Username: {0}'.format(username))
-        self.session['username'] = username
-        self.log('self.session["username"] is set to %s' % self.session['username'])
+        
+        # 20130906:LyV: Added this line to initialize the object.
+        self.initialize(username)
+        
+        # 20130906:LyV: For now, comment out the session attribute, since
+        # this object has not associated with a session yet.
+        #
+        # self.session['username'] = username
+        # self.log('self.session["username"] is set to %s' % self.session['username'])
         user_id = self.socket.sessid
         self.players.append(self.nicknames[user_id])
 
@@ -470,7 +484,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
 
     def on_user_message(self, msg):
         self.log('User message: {0}'.format(msg))
-        username = self.session['username']
+        user_id = self.socket.sessid
+        username = self.usernames[user_id]
         self.broadcast_event('message', username, msg)
         return True
 
