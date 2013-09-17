@@ -13,18 +13,20 @@ from werkzeug.exceptions import NotFound
 # import flask stuff
 from flask import Flask, Response, flash, request, session, render_template, url_for, redirect
 
+# import game logic from monsterzoo.py
 from monsterzoo import *
 
+# import logging functions to setup log file
 from datetime import datetime
-
 import logging
 from logging.handlers import RotatingFileHandler
 
-# create a Flask app
+# create a Flask app (the main web application)
 app = Flask(__name__)
 app.debug = True
-handler = RotatingFileHandler('console.log', maxBytes=1000000, backupCount=5)
 
+# setup logging, with default level of INFO and higher
+handler = RotatingFileHandler('console.log', maxBytes=1000000, backupCount=5)
 handler.setLevel(logging.INFO)
 app.logger.addHandler(handler)
  
@@ -72,7 +74,6 @@ def login():
 def logout():
     # remove the username from the session if it's there
     flash('You are now logged out %s' % session['username'])
-    #users.remove(session['username'])
     session.pop('username', None)
     return redirect(url_for('index'))
 
@@ -90,9 +91,11 @@ def create_room():
 @app.route('/game_room')
 def room():
     """
-    The "room" to play a game.
+    The "room" to play a game. Contains play experience.
     """
     return render_template('game_room.html')
+
+# Routes for static content / static templates
 
 @app.route('/cards')
 def cards():
@@ -128,11 +131,17 @@ def credits():
 
 class PlayerMixin(object):
     def broadcast_to_player(self, player_id, event, *args):
+        """
+        This is sent to just the player identified by player_id.
+        """
         pkt = dict(type="event", name=event, args=args, endpoint=self.ns_name)
         
         self.socket.server.sockets[player_id].send_packet(pkt)
 
     def broadcast_to_players(self, players, event, *args):
+        """
+        This is sent to all players identified by the players variable.
+        """
         pkt = dict(type="event", name=event, args=args, endpoint=self.ns_name)
 
         for player in players:
@@ -145,15 +154,15 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     #game = None
     #end_turn = False
     #login_count = 0
-    player_games = {}
-    player_queue = []
-    game_list = []
+    player_games = {} # stores a dictionary with player ids as key, game objects as values
+    player_queue = [] # used to place 2 players together in a game
+    game_list = [] # list of game objects
 
-    def initialize(self, username):
+    def initialize(self):
         user_id = self.socket.sessid
         self.emit('userid', user_id)
-        self.nicknames[user_id] = Player(user_id)
-        self.usernames[user_id] = username
+        self.nicknames[user_id] = Player(user_id) # create a new Player object with sessionid as player_id
+        #self.usernames[user_id] = username
         self.logger = app.logger
         self.log("Socketio session started")
         self.log("Nicknames data: %r" % self.nicknames)
@@ -164,7 +173,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.selected_cards_wild = []
         self.play_stack = []
         self.players_in_game = [] # list ids of all players in game with you
-        self.card = None
+        self.card = None # current card being played
         self.game = None # equal to the instance's specific game object
 
     def recv_disconnect(self):
@@ -181,7 +190,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         # try removing player from self.players
         try:
             self.log("self.session['username'] is set to %s" % self.session['username'])
-            username = self.usernames[user_id]
+            username = self.session['username']
+            #username = self.usernames[user_id]
             self.broadcast_event('announcement','%s has left' % username)
             self.log('Username %s has left' % username)
             self.log('Trying to remove player ID %s from the players list' % user_id)
@@ -223,7 +233,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         card.play(player)
         self.log('Trying to play card %s at index location %s' % (card, location))
         self.log("Game is %r" % self.game)
-        username = self.usernames[user_id]
+        username = self.session['username']
+        #username = self.usernames[user_id]
         self.broadcast_to_players(self.game.players, 'play-update', username, "Played %s. (%s)" % (card.name, card.description))
         #self.render(player_id)
         #self.render_game()
@@ -414,13 +425,13 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.log('Username: {0}'.format(username))
         
         # 20130906:LyV: Added this line to initialize the object.
-        self.initialize(username)
+        # self.initialize(self,username)
         
         # 20130906:LyV: For now, comment out the session attribute, since
         # this object has not associated with a session yet.
         #
-        # self.session['username'] = username
-        # self.log('self.session["username"] is set to %s' % self.session['username'])
+        self.session['username'] = username
+        self.log('self.session["username"] is set to %s' % self.session['username'])
         user_id = self.socket.sessid
         self.players.append(self.nicknames[user_id])
 
@@ -485,7 +496,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     def on_user_message(self, msg):
         self.log('User message: {0}'.format(msg))
         user_id = self.socket.sessid
-        username = self.usernames[user_id]
+        username = self.session['username']
+        #username = self.usernames[user_id]
         self.broadcast_event('message', username, msg)
         return True
 
