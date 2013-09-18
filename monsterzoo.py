@@ -26,11 +26,13 @@ class Card(object):
 
     def discard(self, player):
         hand = player.hand
-        discard = player.discard
+        discard = player.played
+        #discard = player.discard
         try:
             print "Trying to remove card %r from hand" % self
             hand.remove_card(self)
             discard.add_to_bottom(self)
+            print "Cards in player.played %r" % player.played.cards
         except:
             print "Card is not in hand"
 
@@ -802,11 +804,12 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [BooBoogly(), BooBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
         self.discard = Deck()
+        self.played = Deck()
         self.zoo = Hand()
         self.food = 0
         self.food_discount = 0
@@ -844,8 +847,6 @@ class Wild(Player):
                 BooBoogly(),
                 MeeraBoogly(),
                 MeeraBoogly(),
-                OoglyBoogly(),
-                OoglyBoogly(),
                 Cookies(),
                 Cookies(),
                 FumbleeBoogly(),
@@ -1007,6 +1008,10 @@ class Game(object):
                 x.turn = True
             else:
                 x.turn = False
+        print "Moving played cards to discard"
+        player.discard.cards = player.discard.cards + player.played.cards
+        print "Emptying played cards"
+        player.played.cards = []
         print "Setting food to zero"
         player.food = 0
         print "Reset card costs"
