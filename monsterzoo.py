@@ -804,7 +804,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [PortaBoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -824,9 +824,10 @@ class Player(object):
                 print "Deck is EMPTY"
                 print "============="
                 print "Shuffling in Discard"
-                for card in self.discard.cards:
-                    self.discard.remove_card(card)
-                    self.deck.add_to_bottom(card)
+                self.deck.cards = self.deck.cards + self.discard.cards
+                self.discard.cards = []
+                print "Discard: %r" % len(self.discard.cards)
+                print "Deck: %r" % len(self.deck.cards)
                 self.deck.shuffle_cards()
                 
             card = self.deck.draw_card()

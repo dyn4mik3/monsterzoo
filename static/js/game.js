@@ -270,6 +270,12 @@ $(function() {
         };
     });
 
+    socket.on('cards_played', function(player, count) {
+        if (player == this.socket.sessionid) {
+            $('#cards-played').html(count);
+        };
+    });
+
     socket.on('select_cards', function(player, card_index) {
         $('#player1-zoo .playbutton .btn').hide();
         $('#player1 .playbutton .btn').show();
@@ -301,8 +307,10 @@ $(function() {
     });
 
 
+
     socket.on('select_card_from_wild', function(player, card_index) {
         $('#wild .playbutton .buy-this').hide(); // hide any buy this buttons
+        $('#player1 .playbutton .btn').hide();
         var index_location = 0;
         $('#wild .playbutton').each(function(index_location) {
             var button = '<button type="button" ' + 'id="wild' + index_location +'" ' +

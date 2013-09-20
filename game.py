@@ -231,11 +231,14 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.card = card
         card.socket = self
         card.play(player)
-        self.log('Trying to play card %s at index location %s' % (card, location))
-        self.log("Game is %r" % self.game)
+        # This is useful for debugging. Not essential for logging.
+        #
+        #self.log('Trying to play card %s at index location %s' % (card, location))
+        #self.log("Game is %r" % self.game)
         username = self.session['username']
         #username = self.usernames[user_id]
         self.broadcast_to_players(self.game.players, 'play-update', username, "Played %s. (%s)" % (card.name, card.description))
+        self.log("%s: Played %s. (%s)" % (username, card.name, card.description))
         #self.render(player_id)
         #self.render_game()
 
@@ -294,6 +297,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         card = wild.hand.cards[location]
         self.log('Buying card %r' % card)
         self.broadcast_to_players(self.game.players, 'play-update', self.session['username'], "Bought %s. (%s)" % (card.name, card.description))
+        self.log("%s: Bought %s. (%s)" % (self.session['username'], card.name, card.description))
         modified_card_cost = max(0,(card.cost - player.food_discount))
         if modified_card_cost <= player.food:
             player.food = player.food - modified_card_cost
@@ -307,6 +311,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         else:
             print "Card cost greater than food + food_discount"
 
+    '''
     def on_deal(self, player_id, num = 1):
         player = self.nicknames[player_id]
         cards = player.deal(num)
@@ -317,6 +322,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         #    self.broadcast_event('announcement', 'Player {%s} has the following cards: %r' % (player_id, player.hand.cards))
         #    self.broadcast_event('deal_card', player_id, card.name, card.cost, card.image, card.description);
         return True
+    '''
 
     def get_food_discount(self):
         for player in self.game.players:
@@ -347,6 +353,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
             self.broadcast_to_players(self.game.players, 'food_discount', player.player_id, player.food_discount)
             self.broadcast_to_players(self.game.players, 'deck_count', player.player_id, len(player.deck.cards))
             self.broadcast_to_players(self.game.players, 'discard_count', player.player_id, len(player.discard.cards))
+            self.broadcast_to_players(self.game.players, 'cards_played', player.player_id, len(player.played.cards))
         # render wild
         food_discount = self.get_food_discount()
         cards = self.game.wild.hand.cards
@@ -458,24 +465,6 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         print "Player Queue: %r" % self.player_queue
         print "Player Games: %r" % self.player_games
 
-        # Once 2 players login, start game 
-        '''
-        if len(self.players) == 2:
-            self.broadcast_event('announcement', '2 Players have connected')
-            self.broadcast_event('game_start', len(self.players))
-            GameNamespace.game = Game(self.players)
-            self.game.wild.deal(5)
-            self.render_wild(self.game.wild)
-            for player in self.players:
-                self.broadcast_event('announcement', 'Trying to deal to %s' % player.player_id)
-                for _ in range(5):
-                    self.on_deal(player.player_id)
-            self.log('Playing Game')
-            self.broadcast_event('turn', self.players[1].player_id)
-            self.players[0].turn = True
-            self.log("Game is %r" % self.game)
-        '''
-
     def on_turn(self):
         user_id = self.socket.sessid
         player = self.nicknames[user_id]
@@ -484,6 +473,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.render_game()
         self.broadcast_to_players(self.game.players, 'turn', self.socket.sessid)
         self.broadcast_to_players(self.game.players, 'play-update', 'Game Event', 'End of Turn')
+        self.log('End Turn')
         #self.broadcast_event('turn', self.socket.sessid)
 
     def on_discard(self, card_index):
