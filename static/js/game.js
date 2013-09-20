@@ -139,14 +139,29 @@ $(function() {
         };
     });
 
-    socket.on('render_card', function(player, card_name, card_cost, card_image, card_text, index_location) {
+    socket.on('render_card', function(player, card_name, card_cost, card_image, card_text, card_family, index_location) {
+        if (card_family == 'Boogly') {
+            var card_class = '<div class="card booglyback" ';
+        }
+        else if (card_family == 'Oogly') {
+            var card_class = '<div class="card ooglyback" ';
+        }
+        else if (card_family == 'Zoogly') {
+            var card_class = '<div class="card zooglyback" ';
+        }
+        else if (card_family == 'Food') {
+            var card_class = '<div class="card foodback" ';
+        }
+        else {
+            var card_class = '<div class="card" ';
+        }
         var card_back = '<div class="card cardback" style="background-color:#f79a2f;"><div class="corner top_left"><span class="number">' + 
         '</span></div><div class="corner top_right"><span class="number">' + 
         '</span></div><div class="card_image"><p><img src="/static/images/Logo.png" height="80px"></p>' +
         '</div>' +
         '</div>';
 
-        var card_layout = '<div class="card" id="player1card' + index_location +
+        var card_layout = card_class + 'id="player1card' + index_location +
         '"><div class="corner top_right"><span class="number">' + card_cost + 
         '</span></div><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
@@ -234,6 +249,24 @@ $(function() {
         }
         else {
             $('#player2-score').html(score);
+        };
+    });
+
+    socket.on('deck_count', function(player, count) {
+        if (player == this.socket.sessionid) {
+            $('#player1-deck').html(count);
+        }
+        else {
+            $('#player2-deck').html(count);
+        };
+    });
+
+    socket.on('discard_count', function(player, count) {
+        if (player == this.socket.sessionid) {
+            $('#player1-discard').html(count);
+        }
+        else {
+            $('#player2-discard').html(count);
         };
     });
 

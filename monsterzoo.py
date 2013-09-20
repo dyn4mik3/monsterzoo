@@ -203,7 +203,7 @@ class FumbleeBoogly(Card):
 class BooBoogly(Card):
     def __init__(self):
         self.name = 'Boo Boogly'
-        self.description = 'Draw 3 Cards'
+        self.description = 'Draw 2 Cards'
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 3
@@ -211,7 +211,7 @@ class BooBoogly(Card):
     
     def play(self, player):
         self.discard(player)
-        player.deal(3) # draw 3 cards 
+        player.deal(2) # draw 3 cards 
         print "Played Boo Boogly"
         self.socket.render_game()
 
@@ -316,7 +316,7 @@ class FloBoogly(Card):
 class KoppiBoogly(Card):
     def __init__(self):
         self.name = 'Koppi Boogly'
-        self.description = 'Draw 3 Cards if you have a Boogly in your Zoo.'
+        self.description = 'Draw 2 Cards if you have a Boogly in your Zoo.'
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 2
@@ -330,7 +330,7 @@ class KoppiBoogly(Card):
                 count += 1
         if count > 0:
             print "Found a Boogly in Zoo. Dealing 3 Cards."
-            player.deal(3)
+            player.deal(2)
         else:
             print "No Boogly in Zoo"
         print "Played Koppi Boogly"
@@ -380,7 +380,7 @@ class LurtiBoogly(Card):
 class PortaBoogly(Card):
     def __init__(self):
         self.name = 'Porta Boogly'
-        self.description = "Swap a Monster card from your hand with a card in The Wild."
+        self.description = "Swap a Monster card from your hand with a card in The Wild. Put the Monster card in your Discard."
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 3
@@ -399,7 +399,7 @@ class PortaBoogly(Card):
             player.hand.remove_card(card)
             wild.hand.add_to_bottom(card)
             wild.hand.remove_card(wildcard)
-            player.hand.add_to_bottom(wildcard)
+            player.discard.add_to_bottom(wildcard)
             self.discard(player)
             self.socket.log('Played: Porta Boogly')
             self.socket.selected_cards = [] # reset the selected cards
@@ -538,7 +538,7 @@ class FifiOogly(Card):
         self.description = '+1 Food. Monsters cost 1 less food to catch this turn. Zoo Effect: Monsters cost 1 less to catch this turn.'
         self.card_type = "Monster"
         self.card_family = "Oogly"
-        self.cost = 3
+        self.cost = 5
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
@@ -569,7 +569,7 @@ class OoglyBoogly(Card):
 class JusteeZoogly(Card):
     def __init__(self):
         self.name = 'Justee Zoogly'
-        self.description = 'Remove a card in your hand from the game. Draw a card.'
+        self.description = 'Remove a card in your hand from the game. Draw 3 cards.'
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 2
@@ -580,7 +580,7 @@ class JusteeZoogly(Card):
         if self.socket.selected_cards:
             card = self.get_selected_card()
             player.hand.remove_card(card)
-            player.deal(1)
+            player.deal(3)
             self.discard(player)
             self.socket.log('Played: Justee Zoogly')
             self.socket.selected_cards = [] # reset the selected cards
@@ -623,7 +623,7 @@ class OhnoZoogly(Card):
 class ViktorZoogly(Card):
     def __init__(self):
         self.name = 'Viktor Zoogly'
-        self.description = 'Gain food equal to the number of monsters in your opponents Zoo.'
+        self.description = 'Gain food equal to the number of monsters in an opponents Zoo.'
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 2
@@ -671,7 +671,7 @@ class SluggoZoogly(Card):
         self.description = 'Move a random Monster in opponents Zoo back to opponents hand'
         self.card_type = "Monster"
         self.card_family = "Zoogly"
-        self.cost = 2
+        self.cost = 3
         self.image = "/static/images/Zoogly.png"
         self.socket = '' # this will hold the socketio object
     
@@ -804,7 +804,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [BooBoogly(), BooBoogly(),ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -889,6 +889,8 @@ class Wild(Player):
                 ViktorZoogly(),
                 BossiZoogly(),
                 BossiZoogly(),
+                ZookeeZoogly(),
+                ZookeeZoogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)

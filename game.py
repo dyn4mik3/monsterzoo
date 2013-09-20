@@ -335,7 +335,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
             location = 0
             for card in cards: # render cards in hand
                 #self.log('Rendering card with info %r, %r, %r, %r, %r, %r' % (player.player_id, card.name, card.cost, card.image, card.description, location))
-                self.broadcast_to_players(self.game.players,'render_card', player.player_id, card.name, card.cost, card.image, card.description, location)
+                self.broadcast_to_players(self.game.players,'render_card', player.player_id, card.name, card.cost, card.image, card.description, card.card_family, location)
                 location += 1
             self.broadcast_to_players(self.game.players, 'empty_zoo', player.player_id)
             location = 0
@@ -345,6 +345,8 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
             self.broadcast_to_players(self.game.players, 'food', player.player_id, player.food)
             self.broadcast_to_players(self.game.players,'score', player.player_id, player.score)
             self.broadcast_to_players(self.game.players, 'food_discount', player.player_id, player.food_discount)
+            self.broadcast_to_players(self.game.players, 'deck_count', player.player_id, len(player.deck.cards))
+            self.broadcast_to_players(self.game.players, 'discard_count', player.player_id, len(player.discard.cards))
         # render wild
         food_discount = self.get_food_discount()
         cards = self.game.wild.hand.cards
