@@ -138,6 +138,8 @@ class DirtySocks(Card):
         self.card_type = "Food"
         self.card_family = "Food"
         self.cost = 0
+        self.remodel = False
+        self.remodel_card = None
         self.food = 1
         self.image = "/static/images/Food.png"
 
@@ -154,6 +156,8 @@ class Cookies(Card):
         self.card_type = "Food"
         self.card_family = "Food"
         self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
         self.food = 3
         self.image = "/static/images/Food.png"
     
@@ -163,6 +167,33 @@ class Cookies(Card):
         print "Played Cookies"
         self.socket.render_game()
 
+class YouYoogly(Card):
+    def __init__(self):
+        self.name = "You Yoogly"
+        self.description = "Force a Monster to Remodel"
+        self.card_type = "Monster"
+        self.card_family = "Yoogly"
+        self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 3
+        self.image = "/static/images/Oogly.png"
+    
+    def play(self, player):
+        if self.socket.selected_cards:
+            card = self.get_selected_card()
+            self.socket.selected_cards = []
+            card.remodel = True
+            card.remodel_card = self
+            player.hand.remove_card(self)
+            self.socket.log('Played You Yoogly')
+            self.socket.play_stack.remove(self)
+            self.socket.render_game()
+        else:
+            self.socket.log('Getting card from other player zoo')
+            self.socket.play_stack.append(self)
+            self.socket.emit('select_card_from_other_zoo', player.player_id, 1)
+ 
 class FumbleeBoogly(Card):
     def __init__(self):
         self.name = "Fumblee Boogly"
@@ -170,6 +201,8 @@ class FumbleeBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 4
+        self.remodel = False
+        self.remodel_card = None
         self.food = 0
         self.image = "/static/images/Boogly.png"
     
@@ -207,6 +240,8 @@ class BooBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Boogly.png"
     
     def play(self, player):
@@ -222,6 +257,8 @@ class MeeraBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Boogly.png"
 
     def play(self, player):
@@ -262,6 +299,8 @@ class WhompoBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 4
+        self.remodel = False
+        self.remodel_card = None
         self.food = 2
         self.image = "/static/images/Boogly.png"
     
@@ -283,6 +322,8 @@ class BoomerBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 6
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Boogly.png"
     
     def play(self, player):
@@ -306,6 +347,8 @@ class FloBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Boogly.png"
     
     def play(self, player):
@@ -320,6 +363,8 @@ class KoppiBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 2
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Boogly.png"
     
     def play(self, player):
@@ -343,6 +388,8 @@ class LanzoBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 5
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Boogly.png"
     
     def play(self, player):
@@ -362,6 +409,8 @@ class LurtiBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 4
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Boogly.png"
     
     def play(self, player):
@@ -384,6 +433,8 @@ class PortaBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Boogly.png"
     
     def play(self, player):
@@ -427,6 +478,8 @@ class HuntoOogly(Card):
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 5
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
@@ -462,6 +515,8 @@ class ChunkyOogly(Card):
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
@@ -478,6 +533,8 @@ class YummliOogly(Card):
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 6
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
@@ -494,6 +551,8 @@ class RinkaOogly(Card):
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 2
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
@@ -509,6 +568,8 @@ class RipliOogly(Card):
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
@@ -523,6 +584,8 @@ class ParksOogly(Card):
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 5
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
@@ -539,6 +602,8 @@ class FifiOogly(Card):
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 5
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
@@ -558,6 +623,8 @@ class OoglyBoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Oogly.png"
     
     def play(self, player):
@@ -573,6 +640,8 @@ class JusteeZoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 2
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Zoogly.png"
 
     def play(self, player):
@@ -604,6 +673,8 @@ class OhnoZoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 6
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Zoogly.png"
 
     def play(self, player):
@@ -627,6 +698,8 @@ class ViktorZoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 2
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Zoogly.png"
         self.socket = '' # this will hold the socketio object
     
@@ -644,6 +717,8 @@ class BossiZoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 4
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Zoogly.png"
         self.socket = '' # this will hold the socketio object
     
@@ -672,6 +747,8 @@ class SluggoZoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Zoogly.png"
         self.socket = '' # this will hold the socketio object
     
@@ -698,6 +775,8 @@ class ZookeeZoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 3
+        self.remodel = False 
+        self.remodel_card = None
         self.image = "/static/images/Zoogly.png"
         self.socket = '' # this will hold the socketio object
     
@@ -731,6 +810,8 @@ class ZoomiZoogly(Card):
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 5
+        self.remodel = False
+        self.remodel_card = None
         self.image = "/static/images/Zoogly.png"
         self.socket = '' # this will hold the socketio object
     
@@ -804,7 +885,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [PortaBoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [YouYoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -1037,7 +1118,7 @@ class Game(object):
         for player in self.players:
             score = 0
             for card in player.zoo.cards:
-                if card.cost:
+                if card.cost and (card.remodel == False):
                     score += card.cost
             player.score = score
             if player.score >= 30:

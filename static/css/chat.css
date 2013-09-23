@@ -57,12 +57,26 @@ code {
 }
 
 /* CARD STUFF */
-.playbutton {
+.playbutton, .remodelbutton {
     /*width: 120px;*/
     /* float:left; */
     text-align:center;
     margin: 0 auto;
 }
+.remodel {
+    background-color: rgba(0,0,0,0.75);
+    /*
+    background-color:white;
+    opacity: 0.75;
+    */
+    z-index:20;
+    height:100%;
+    width:100%;
+    position:absolute;
+    top:0px;
+    left:0px;
+}
+
 .card { 
     background-color: #fff; 
     -moz-border-radius: 10px; 

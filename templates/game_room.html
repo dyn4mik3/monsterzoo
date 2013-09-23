@@ -316,6 +316,11 @@
         $('.row').on('click', '.buy-this', function(event) {
             socket.emit('buy', this.name);
         });
+
+        // Bind the card buy this buttons
+        $('.row').on('click', '.remodel-this', function(event) {
+            socket.emit('remodel', this.name);
+        });
     });
 </script>
 {% endblock content %}

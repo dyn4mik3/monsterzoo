@@ -272,6 +272,14 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.log ('Playing card from self.card %r' % self.card)
         self.card.play(player)
 
+    def get_opponent(self, player):
+        player_index = self.game.players.index(player)
+        if player_index == 0:
+            opponent = self.players[1]
+        elif player_index == 1:
+            opponent = self.players[0]
+        return opponent
+
     def on_selected_card_from_other_zoo(self, index):
         player_id = self.socket.sessid
         player = self.nicknames[player_id]
@@ -311,18 +319,17 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         else:
             print "Card cost greater than food + food_discount"
 
-    '''
-    def on_deal(self, player_id, num = 1):
+    def on_remodel(self, location):
+        location = int(location)
+        player_id = self.socket.sessid
         player = self.nicknames[player_id]
-        cards = player.deal(num)
-        self.log('Cards returned by Player deal function %r' % cards)
-        self.render(player_id)
-        #for card in cards:
-        #    self.log('Player {%s} requested a card. {%r}' % (player_id, card))
-        #    self.broadcast_event('announcement', 'Player {%s} has the following cards: %r' % (player_id, player.hand.cards))
-        #    self.broadcast_event('deal_card', player_id, card.name, card.cost, card.image, card.description);
-        return True
-    '''
+        card = player.zoo.cards[location]
+        card.remodel = False
+        opponent = self.get_opponent(player)
+        opponent.discard.add_to_bottom(card.remodel_card)
+        card.remodel_card = None
+        player.food = player.food - card.cost
+        self.render_game()
 
     def get_food_discount(self):
         for player in self.game.players:
@@ -345,10 +352,10 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
                 location += 1
             self.broadcast_to_players(self.game.players, 'empty_zoo', player.player_id)
             location = 0
-            for card in zoo: # render cards in zoo
-                self.broadcast_to_players(self.game.players,'render_zoo', player.player_id, card.name, card.cost, card.image, card.description, location)
-                location += 1
             self.broadcast_to_players(self.game.players, 'food', player.player_id, player.food)
+            for card in zoo: # render cards in zoo
+                self.broadcast_to_players(self.game.players,'render_zoo', player.player_id, card.name, card.cost, card.image, card.description, card.remodel, location)
+                location += 1
             self.broadcast_to_players(self.game.players,'score', player.player_id, player.score)
             self.broadcast_to_players(self.game.players, 'food_discount', player.player_id, player.food_discount)
             self.broadcast_to_players(self.game.players, 'deck_count', player.player_id, len(player.deck.cards))

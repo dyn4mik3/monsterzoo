@@ -60,6 +60,7 @@ $(function() {
             $('#turn-player1').show();
             $('#discard-player1').show();
             $('#player1 .play-this').show();
+            $('#player1-zoo .remodelbutton .btn').show();
         }
         else if (turn == false) {
             $('.btn').hide();
@@ -214,8 +215,27 @@ $(function() {
     });
 
 
-    socket.on('render_zoo', function(player, card_name, card_cost, card_image, card_text, index_location) {
-        var card_layout = '<div class="card"><div class="corner top_right"><span class="number">' + card_cost + 
+    socket.on('render_zoo', function(player, card_name, card_cost, card_image, card_text, card_remodel, index_location) {
+        if (card_remodel == true) {
+            card_name = 'Taking a Break';
+            var remodel_class = '<div class="remodel"><div class="corner top_right"><span class="number">' + card_cost +
+                                '</span></div><div class="corner top_left"><span class="number text-danger">' + card_name +
+                                '</span></div>' +
+                                '<div class="card_image"><h1><span class="glyphicon glyphicon-ban-circle"></span></h1></div>';
+            var remodel_button_on = '<div class="remodelbutton"><button type="button" name="' + index_location + '" class="btn btn-primary btn-small remodel-this">Feed</button></div></div>';
+            var remodel_button_off  = '</div>';
+            var food = $('#player1-food').html();
+            if (food >= card_cost && player == this.socket.sessionid) {
+                remodel_class = remodel_class + remodel_button_on;
+            }
+            else {
+                remodel_class = remodel_class + remodel_button_off;
+            };
+        }
+        else {
+            var remodel_class = '';
+        };
+        var card_layout = '<div class="card">' + remodel_class + '<div class="corner top_right"><span class="number">' + card_cost + 
         '</span></div><div class="corner top_left"><span class="number">' + card_name + 
         '</span></div><div class="card_image"><p><img src="' + card_image +
         '" height="80px"></p>' + card_text +
