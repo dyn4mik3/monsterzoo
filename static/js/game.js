@@ -119,6 +119,14 @@ $(function() {
         }
     });
 
+    socket.on('event', function(card_name, card_image, card_text) {
+        var card_layout = '<div class="horiz-card"><div class="corner top_left"><span class="number">' + card_name +
+        '</span></div><div class="card_image"><p><img src="' + card_image +
+        '" height="50px"></p>' + card_text +
+        '</div></div>';
+        $('#event').append(card_layout);
+    });
+
     socket.on('render_wild', function(player, card_name, card_cost, card_image, card_text, index_location) {
         var button = '<button type="button" ' + 'id="wild' + index_location +'" ' +
         'name="' + index_location + '" class="btn btn-primary btn-xs buy-this">Buy This Card</button>';

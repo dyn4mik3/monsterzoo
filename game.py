@@ -429,6 +429,9 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         new_game.wild.deal(5)
         for player in players:
             player.deal(5)
+        event_card = new_game.wild.event_card
+        print "Event Card: %r" % event_card
+        self.broadcast_to_players(players, 'event', event_card.name, event_card.image, event_card.description)
         self.broadcast_to_players(players, 'turn', players[1].player_id)
         players[0].turn = True
         self.log("Start game function complete")

@@ -140,6 +140,60 @@ class Card(object):
             print "Card is not in the play stack"
             return False
 
+class ZooglyZoo(Card):
+    def __init__(self):
+        self.name = "Zoogly Zoo"
+        self.description = "+1 Food for Each Zoogly in Your Zoo"
+        self.card_type = "Event"
+        self.card_family = "Event"
+        self.cost = 0
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 1
+        self.image = "/static/images/Visitor.png"
+
+    def play(self, player):
+        for card in player.zoo.cards:
+            if card.card_family == "Zoogly":
+                player.food += 1
+        print "Oogly Zoo - Event"
+
+class OoglyZoo(Card):
+    def __init__(self):
+        self.name = "Oogly Zoo"
+        self.description = "+1 Food for Each Oogly in Your Zoo"
+        self.card_type = "Event"
+        self.card_family = "Event"
+        self.cost = 0
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 1
+        self.image = "/static/images/Visitor.png"
+
+    def play(self, player):
+        for card in player.zoo.cards:
+            if card.card_family == "Oogly":
+                player.food += 1
+        print "Oogly Zoo - Event"
+
+class BooglyZoo(Card):
+    def __init__(self):
+        self.name = "Boogly Zoo"
+        self.description = "Draw a Card for Each Boogly in Your Zoo"
+        self.card_type = "Event"
+        self.card_family = "Event"
+        self.cost = 0
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 1
+        self.image = "/static/images/Visitor.png"
+
+    def play(self, player):
+        for card in player.zoo.cards:
+            if card.card_family == "Boogly":
+                player.deal(1)
+        print "Boogly Zoo - Event"
+
 class DirtySocks(Card):
     def __init__(self):
         self.name = "Dirty Socks"
@@ -921,7 +975,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [FloBoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -960,6 +1014,11 @@ class Player(object):
 
 class Wild(Player):
     def __init__(self, player_id='wild'):
+        event_deck = [
+                OoglyZoo(),
+                ZooglyZoo(),
+                BooglyZoo()
+                ]
         starter_deck = [
                 BooBoogly(),
                 BooBoogly(),
@@ -1012,6 +1071,7 @@ class Wild(Player):
                 MunchOogly(),
                 MunchOogly()
             ]
+        self.event_card = random.choice(event_deck)
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.deck.shuffle_cards()
@@ -1151,6 +1211,8 @@ class Game(object):
         print "Calculating zoo effects"
         for card in player.zoo.cards:
             card.zoo_effect(player)
+        # print "Calculating event effects"
+        # self.wild.event_card.play(player)
 
     def calculate_scores(self):
         for player in self.players:

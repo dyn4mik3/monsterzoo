@@ -93,6 +93,23 @@ code {
     z-index: 2; 
 }
 
+.horiz-card {
+    background-color: #f79a2f; 
+    -moz-border-radius: 10px; 
+    -webkit-border-radius: 10px; 
+    border-radius: 10px; 
+    -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
+    -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
+    float: left; 
+    height: 140px; 
+    margin: 0 8px 8px 0; 
+    position: relative; 
+    width: 300px; 
+    z-index: 2; 
+    color:white;
+}
+
 /*
 .booglyback {
     background-color:bisque;
@@ -145,11 +162,23 @@ code {
     left:10px; top:12px; */
 }
 
+.horiz-card .top_left {
+    margin-top:12px;
+    text-align:center;
+}
+
+.horiz-card .number {
+    font-size:22px;
+    font-weight:bold;
+    color:white;
+    text-align:center;
+}
+
 .card .number {
     font-size:22px;
 font-weight:bold;
 }
-.card .card_image {
+.card .card_image, .horiz-card .card_image {
 text-align:center;margin-left:8px;margin-right:8px;margin-top:5px;
 }
 
