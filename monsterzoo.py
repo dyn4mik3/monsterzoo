@@ -20,6 +20,15 @@ class Card(object):
         # Special rule for Ripli Oogly
         if card.name == "Ripli Oogly":
             player.food += len(player.zoo.cards)
+
+        # Special rule for Flo Boogly's Zoo Effect
+        flo = False
+        for zoocard in player.zoo.cards:
+            if isinstance(zoocard, FloBoogly) == True:
+                flo = True
+        if flo == True:
+            player.deal(1)
+
         player.hand.remove_card(card)
         player.zoo.add_to_bottom(card)
         return card
@@ -912,7 +921,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [MunchOogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [FloBoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
