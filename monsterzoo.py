@@ -295,7 +295,7 @@ class MeeraBoogly(Card):
 class WhompoBoogly(Card):
     def __init__(self):
         self.name = 'Whompo Boogly'
-        self.description = '+2 Food. Zoo Effect: Draw a card.'
+        self.description = '+2 Food.<br/><br/><span class="text-primary"><b>Zoo Effect:</b></span> Draw a card.</span>'
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 4
@@ -343,7 +343,7 @@ class BoomerBoogly(Card):
 class FloBoogly(Card):
     def __init__(self):
         self.name = 'Flo Boogly'
-        self.description = 'Zoo Effect: Draw a card each time you put a Monster into your Zoo'
+        self.description = '<span class="text-primary"><b>Zoo Effect:</b></span> Draw a card each time you put a Monster into your Zoo</span>'
         self.card_type = "Monster"
         self.card_family = "Boogly"
         self.cost = 3
@@ -470,6 +470,33 @@ class PortaBoogly(Card):
             self.select_only_monsters(1, player, porta) # issue with meera boogly, if this is run then meera is played before card can be selected
             self.socket.play_stack.append(self)
             print "Porta: Play stack is %r" % self.socket.play_stack
+
+class MunchOogly(Card):
+    def __init__(self):
+        self.name = 'Munch Oogly'
+        self.description = 'Gain 1 Food.<br/><br/><span class="text-primary"><b>Zoo Effect:</b></span> Gain 1 Food for every Oogly in your Zoo.'
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
+        self.image = "/static/images/Oogly.png"
+
+    def zoo_effect(self, player):
+        count = 0
+        for card in player.zoo.cards:
+            if card.card_family == "Oogly":
+                count += 1
+        if count > 0:
+            player.food += count
+        else:
+            print "No Oogly in Zoo"
+        print "Zoo Effect Munch Oogly"
+ 
+    def play(self, player):
+        player.food += 1
+        self.discard(player)
+        self.socket.render_game()
 
 class HuntoOogly(Card):
     def __init__(self):
@@ -598,7 +625,7 @@ class ParksOogly(Card):
 class FifiOogly(Card):
     def __init__(self):
         self.name = 'Fifi Oogly'
-        self.description = '+1 Food. Monsters cost 1 less food to catch this turn. Zoo Effect: Monsters cost 1 less to catch this turn.'
+        self.description = '+1 Food. Monsters cost 1 less food to catch this turn.<br/><br/><span class="text-primary"><b>Zoo Effect:</b></span> Monsters cost 1 less to catch this turn.</span>'
         self.card_type = "Monster"
         self.card_family = "Oogly"
         self.cost = 5
@@ -743,7 +770,7 @@ class BossiZoogly(Card):
 class SluggoZoogly(Card):
     def __init__(self):
         self.name = 'Sluggo Zoogly'
-        self.description = 'Move a random Monster in opponents Zoo back to opponents hand'
+        self.description = 'Move a Monster in opponents Zoo back to opponents hand'
         self.card_type = "Monster"
         self.card_family = "Zoogly"
         self.cost = 3
@@ -885,7 +912,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [YouYoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [MunchOogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -972,7 +999,9 @@ class Wild(Player):
                 BossiZoogly(),
                 BossiZoogly(),
                 ZookeeZoogly(),
-                ZookeeZoogly()
+                ZookeeZoogly(),
+                MunchOogly(),
+                MunchOogly()
             ]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
