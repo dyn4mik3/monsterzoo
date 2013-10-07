@@ -33,28 +33,6 @@ handler = RotatingFileHandler('console.log', maxBytes=1000000, backupCount=5)
 handler.setLevel(logging.INFO)
 app.logger.addHandler(handler)
  
-# "models"
-class GameRoom():
-    def __init__(self,name=""):
-        self.name = name
-        self.players = []
-    
-    def add_player(self, player):
-        self.players.append(player)
-
-class User():
-    def __init__(self):
-        self.username = None
-        self.user_id = None
-        self.status = None
-
-    def waiting_for_game(self):
-        self.status = 'waiting'
-
-# variable to hold the rooms and users
-live_rooms = []
-users = []
-
 app.secret_key = '\x03R\xe8!\xfdZ\x87*\xe9\x07sVI\x88|tt"\xdcb\xab=\xf8;'
 
 # create my views
@@ -82,7 +60,6 @@ def login():
         session['username'] = request.form['username']
         session['user_id'] = randint(1,198237251661)
         flash('You are now logged in as %s' % session['username'])
-        users.append(session['username'])
         return redirect(url_for('index'))
     return render_template('login.html')
 
@@ -94,23 +71,16 @@ def logout():
     session.pop('user_id', None)
     return redirect(url_for('index'))
 
-@app.route('/create_room', methods=['POST'])
-def create_room():
-    """
-    Handles POST from the "Add Room" form on the Homepage. Redirects you to new room. This is the "game" room for each set of players.
-    """
-    name = request.form['name']
-    if name:
-        room = GameRoom(name=name)
-        live_rooms.append(room)
-    return redirect(url_for('index'))
-
 @app.route('/game_room')
 def room():
     """
     The "room" to play a game. Contains play experience.
     """
     return render_template('game_room.html')
+
+@app.route('/room/<int:game_id>')
+def game_room(game_id):
+    return render_template('room.html', game_id=game_id)
 
 # Routes for static content / static templates
 
@@ -164,6 +134,15 @@ class PlayerMixin(object):
         for player in players:
             self.socket.server.sockets[player.player_id].send_packet(pkt)
 
+    def broadcast_to_sockets(self, sockets, event, *args):
+        """
+        This is sent to all sockets in the sockets variable.
+        """
+        pkt = dict(type="event", name=event, args=args, endpoint=self.ns_name)
+
+        for socket_id in sockets:
+            self.socket.server.sockets[socket_id].send_packet(pkt)
+
 class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     # Pseudocode for user management
     # User created for everyone logging in (cookie)
@@ -176,6 +155,191 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     # Game, players, room is deleted after win/loss.
     # User can join multiple games. Unique room ID is combination 
     # of 2 user ids.
+
+    # TODO: Change broadcast function to only broadcast to specific rooms (game_id)
+
+    users = [] # logged in users
+    usernames = {} # logged in users (user_id, username)
+    player_queue = []
+    waiting = []
+    active_games = []
+    current_socket = {}
+
+    def log(self, message):
+        app.logger.info("{0}: [{1}] {2}".format(datetime.now(),self.socket.sessid, message))
+
+    def update_online_users(self):
+        self.broadcast_event('users-online', GameNamespace.users)
+        self.broadcast_event('users-logged-in', list(GameNamespace.usernames.values()))
+        self.broadcast_event('users-waiting', GameNamespace.waiting)
+
+    def initialize(self):
+        self.room = 'lobby'
+        self.join('lobby') # start all users in the main lobby
+        self.username = None
+        self.user_id = None
+        # if user has cookie, assign variables from cookie
+        try:
+            if self.request.flask_session['user_id']:
+                self.log('User is cookied and has user_id:%r' % self.request.flask_session['user_id'])
+                self.user_id = self.request.flask_session['user_id']
+                self.username = self.request.flask_session['username']
+                GameNamespace.users.append(self.user_id) # add user_id to list of logged in users
+                GameNamespace.usernames[self.user_id] = self.username
+                GameNamespace.current_socket[self.user_id] = self.socket.sessid
+                self.log('User %r assigned socket: %r' % (self.user_id, GameNamespace.current_socket[self.user_id]))
+        except:
+            self.log("user_id not available in cookie")
+        self.update_online_users()
+        self.output_everything_to_log()
+
+    def output_everything_to_log(self):
+        self.log("GameNamespace.users: %r" % GameNamespace.users)
+        self.log("GameNamespace.usernames: %r" % GameNamespace.usernames)
+        self.log("GameNamespace.current_socket: %r" % GameNamespace.current_socket)
+        self.log("GameNamespace.active_games: %r" % GameNamespace.active_games)
+        self.log("GameNamespace.player_queue: %r" % GameNamespace.player_queue)
+        self.log("GameNamespace.waiting: %r" % GameNamespace.waiting)
+        self.log("Socket %r is in room: %r" % (self.socket.sessid, self.session['rooms']))
+
+    def recv_disconnect(self):
+        # Remove user_id from list, if cookied
+        self.log("Received a disconnect signal. Current users: %r" % GameNamespace.users)
+        if self.user_id:
+            GameNamespace.users.remove(self.user_id)
+            del GameNamespace.usernames[self.user_id]
+            del GameNamespace.current_socket[self.user_id]
+        self.update_online_users()
+        self.output_everything_to_log()
+        self.disconnect(silent=True)
+
+    def on_ready(self):
+        try:
+            if self.user_id:
+                new_player = Player(self.user_id)
+                GameNamespace.player_queue.append(new_player) # add player to queue
+                GameNamespace.waiting.append(self.user_id) # add user id to the waiting queue
+                self.log('Added player %r to queue' % new_player)
+                self.log('Queue currently has %d players' % len(GameNamespace.player_queue))
+                self.update_online_users()
+        except:
+            self.log('No user_id when trying to create a new Player object')
+
+        if len(GameNamespace.player_queue) == 2:
+            # After 2 players are in queue, create a new game
+            new_game = self.start_game(GameNamespace.player_queue) 
+            GameNamespace.player_queue = []
+            GameNamespace.waiting = [] 
+        self.output_everything_to_log()
+
+    def get_current_socket(self, user_id):
+        return GameNamespace.current_socket[user_id]
+
+    def get_player_sockets(self, players):
+        player_sockets = []
+        for player in players:
+            try:
+                player_sockets.append(self.get_current_socket(player.player_id))
+                self.log("Current socket found for player_id %r" % player.player_id)
+            except:
+                self.log("No socket found for player_id %r" % player.player_id)
+        return player_sockets
+
+    def start_game(self, players):
+        self.log('Starting game')
+        new_game = Game(players)
+        self.log('Game %r has the following Players: %r' % (new_game,players))
+        GameNamespace.active_games.append(new_game)
+        self.log('Active games: %r' % GameNamespace.active_games)
+        # get the current sockets for each player
+        player_sockets = self.get_player_sockets(players)
+        self.log('Player Sockets: %r' % player_sockets)
+        # set the first player's turn
+        self.broadcast_to_sockets(player_sockets, 'turn', players[1].player_id)
+        players[0].turn = True
+        self.log("Start game function complete")
+        # send to game_id to clients
+        self.broadcast_to_sockets(player_sockets, 'game-start', new_game.game_id)
+        return new_game
+
+    def get_food_discount(self, game):
+        for player in game.players:
+            if player.turn == True:
+                return player.food_discount
+
+    def render_game(self, game):
+        # NEED TO FIX THIS - RIGHT NOW RENDERING AFFECTS ALL PLAYERS. IT SHOULD ONLY AFFECT PLAYERS ASSOCIATED WITH GAME
+        # calculate score
+        game.calculate_scores()
+        # render players
+        player_sockets = self.get_player_sockets(game.players)
+        for player in game.players:
+            cards = player.hand.cards
+            zoo = player.zoo.cards
+            self.broadcast_to_sockets(player_sockets,'empty', player.socket_id)
+            location = 0
+            for card in cards: # render cards in hand
+                #self.log('Rendering card with info %r, %r, %r, %r, %r, %r' % (player.player_id, card.name, card.cost, card.image, card.description, location))
+                self.broadcast_to_sockets(player_sockets,'render_card', player.socket_id, card.name, card.cost, card.image, card.description, card.card_family, location)
+                location += 1
+            self.broadcast_to_sockets(player_sockets, 'empty_zoo', player.socket_id)
+            location = 0
+            self.broadcast_to_sockets(player_sockets, 'food', player.socket_id, player.food)
+            for card in zoo: # render cards in zoo
+                self.broadcast_to_sockets(player_sockets,'render_zoo', player.socket_id, card.name, card.cost, card.image, card.description, card.remodel, location)
+                location += 1
+            self.broadcast_to_sockets(player_sockets,'score', player.socket_id, player.score)
+            self.broadcast_to_sockets(player_sockets, 'food_discount', player.socket_id, player.food_discount)
+            self.broadcast_to_sockets(player_sockets, 'deck_count', player.socket_id, len(player.deck.cards))
+            self.broadcast_to_sockets(player_sockets, 'discard_count', player.socket_id, len(player.discard.cards))
+            self.broadcast_to_sockets(player_sockets, 'cards_played', player.socket_id, len(player.played.cards))
+        # render wild
+        food_discount = self.get_food_discount(game)
+        cards = game.wild.hand.cards
+        location = 0
+        self.broadcast_to_sockets(player_sockets, 'empty', 'wild')
+        #self.broadcast_event('empty', 'wild')
+        for card in cards:
+            self.broadcast_to_sockets(player_sockets,'render_wild', 'wild', card.name, max(0,card.cost - food_discount), card.image, card.description, location)
+            #self.broadcast_event('render_wild', 'wild', card.name, max(0,card.cost - food_discount), card.image, card.description, location)
+            location += 1
+        if game.state == 'end':
+            score_dictionary = {}
+            for player in game.players:
+                score_dictionary[player.socket_id] = player.score
+            # get player_id for the winning score
+            winner = max(score_dictionary, key=score_dictionary.get)
+            self.broadcast_to_sockets(player_sockets,'game_over', winner)
+            self.log('Game over. Winner is %r' % winner)
+
+    def get_game_from_id(self,game_id):
+        for game in GameNamespace.active_games:
+            if game_id == game.game_id:
+                self.log('Game %r matches game ID: %r' % (game, game_id))
+                return game
+        self.log('No game found matching game ID: %r' % game_id)
+
+    def set_player_sockets(self, game):
+        for player in game.players:
+            if player.player_id == self.user_id:
+                player.socket_id = self.socket.sessid
+                self.log("Player %r socket now set to: %r" % (player.player_id, player.socket_id))
+                return player.socket_id
+            else:
+                self.log("Player ID does not match user ID")
+
+    def on_game_connect(self, game_id):
+        # This function handles a user connecting to a game URL
+        game = self.get_game_from_id(game_id)
+        self.room = str(game.game_id)
+        self.log("Game ID:%r - String: %r" % (game.game_id, str(game.game_id)))
+        self.join(self.room)
+        self.set_player_sockets(game)
+        self.render_game(game)
+        self.output_everything_to_log()
+
+    #####################################OLD CODE###################################
+    '''
     nicknames = {} # stores a dictionary with sessionids as key, Player objects as values
     usernames = {} # stores a dictionary with sessionids as key, player usernames as values    
     players = [] # stores a list of Player objects
@@ -580,6 +744,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         #username = self.usernames[user_id]
         self.broadcast_event('message', username, msg)
         return True
+    '''
 
 @app.route('/socket.io/<path:remaining>')
 def socketio(remaining):

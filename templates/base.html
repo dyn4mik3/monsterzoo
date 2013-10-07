@@ -10,26 +10,7 @@
 	</head>
 	<body>
         <div id="wrap">
-            <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-                <div class="container">
-                    <div class="navbar-header">
-                        <a class="navbar-brand" href="/">Home</a>
-                    </div>
-                    <div class="collapse navbar-collapse">
-                        <a class="btn btn-default navbar-left navbar-btn" href="{{ url_for('room') }}">Start a Game</a>
-                        <ul class="nav navbar-nav">
-                            <li><a href="{{ url_for('game') }}">Game</a></li>
-                            <li><a href="{{ url_for('rules') }}">Rules</a></li>
-                            <li><a href="{{ url_for('cards') }}">Cards</a></li>
-                            <li><a href="{{ url_for('story') }}">Story</a></li>
-                            <li><a href="{{ url_for('media') }}">Media</a></li>
-                            <li><a href="{{ url_for('printandplay') }}">PNP</a></li>
-                            <li><a href="{{ url_for('credits') }}">Credits</a></li>
-                        </ul>
-                        <p class="navbar-text pull-right">Monster Zoo is a Casual Deck Building Card Game</p>
-                    </div>
-                </div>
-            </div>
+            {% include 'top_nav.html' %}
             <div class="container">
                 <div id="flash">
                     {% with messages = get_flashed_messages() %}
@@ -44,13 +25,7 @@
                 {% block content %} {% endblock content %}
             </div>
         </div>
-        <div id="footer">
-            <div class="container">
-                <p class="text-danger credit"><span class="glyphicon glyphicon-warning-sign"></span> Warning. This is a beta and may break while you are playing. 
-                <span class="text-muted">Thanks for testing! Please <a href="http://www.surveymonkey.com/s/LG82B83" target="_blank">click here to take survey</a> or 
-                    email michael@rubycowgames.com with your feedback.</p>
-            </div>
-        </div>
+        {% include 'footer.html' %}
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
         <script src="/static/js/socketio/socket.io.min.js"></script>
         <script src="/static/js/game.js"></script>

@@ -1,0 +1,27 @@
+            <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+                <div class="container">
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="/">Home</a>
+                    </div>
+                    <div class="collapse navbar-collapse">
+                        <a class="btn btn-default navbar-left navbar-btn" href="{{ url_for('room') }}">Start a Game</a>
+                        <ul class="nav navbar-nav">
+                            <li><a href="{{ url_for('game') }}">Game</a></li>
+                            <li><a href="{{ url_for('rules') }}">Rules</a></li>
+                            <li><a href="{{ url_for('cards') }}">Cards</a></li>
+                            <li><a href="{{ url_for('story') }}">Story</a></li>
+                            <li><a href="{{ url_for('media') }}">Media</a></li>
+                            <li><a href="{{ url_for('printandplay') }}">PNP</a></li>
+                            <li><a href="{{ url_for('credits') }}">Credits</a></li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            {% if not session['username'] %}
+                                <li><a href="{{ url_for('login') }}">Login</a><li>
+                            {% else %}
+                                <p class="navbar-text">Signed in as {{ session['username'] }}</p>
+                                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>

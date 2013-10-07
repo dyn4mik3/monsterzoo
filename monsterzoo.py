@@ -975,7 +975,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [ViktorZoogly(), LanzoBoogly(), SluggoZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -987,6 +987,7 @@ class Player(object):
         self.score = 0
         self.player_id = player_id
         self.turn = False
+        self.socket_id = None
     
     def deal(self, num):
         cards = []
@@ -1085,14 +1086,16 @@ class Game(object):
         self.players = players
         self.num_of_players = len(players)
         self.wild = Wild()
+        self.game_id = random.randint(1,1000000000000000)
+        self.turn = self.players[0]
 
-        # create a dictionary of player items (hands, decks, discards, zoos, etc) for each player
-        #for player in range(num_of_players):
-        #    self.players.append(Player())
-
-        # shuffle decks
+        # shuffle decks, deal
         for player in self.players:
             player.deck.shuffle_cards()
+            player.deal(5)
+
+        # same with wild
+        self.wild.deal(5)
             
     def start(self):
         print "Dealing cards to players"
@@ -1190,6 +1193,7 @@ class Game(object):
                 x.turn = True
             else:
                 x.turn = False
+        self.turn = next_player
         print "Moving played cards to discard"
         player.discard.cards = player.discard.cards + player.played.cards
         print "Emptying played cards"

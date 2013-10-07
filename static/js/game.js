@@ -6,6 +6,44 @@ $(function() {
     $('#turn-player1').hide();
     $('#discard-player1').hide();
 
+    socket.on('game-start', function(game_id) {
+        window.location = '/room/' + game_id;
+    });
+
+    socket.on('users-online', function(socketids) {
+        $('#users-online').empty();
+        console.log('try to empty');
+        for (var i = 0; i < socketids.length; i++) {
+            console.log('in loop');
+            console.log(socketids.length);
+            console.log(socketids[0]);
+            $('#users-online').append($('<p>').text(socketids[i]));
+        };
+    });
+
+    socket.on('users-logged-in', function(socketids) {
+        $('#users-logged-in').empty();
+        console.log('try to empty');
+        for (var i = 0; i < socketids.length; i++) {
+            console.log('in loop logged in');
+            console.log(socketids.length);
+            console.log(socketids[0]);
+            $('#users-logged-in').append($('<p>').text(socketids[i]));
+        };
+    });
+
+    socket.on('users-waiting', function(socketids) {
+        $('#users-waiting').empty();
+        console.log('try to empty');
+        for (var i = 0; i < socketids.length; i++) {
+            console.log('in loop logged in');
+            console.log(socketids.length);
+            console.log(socketids[0]);
+            $('#users-waiting').append($('<p>').text(socketids[i]));
+        };
+    });
+
+
     socket.on('connect', function() {
         $('#game').append($('<p>').text(this.socket.sessionid));
     });

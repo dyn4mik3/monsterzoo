@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block content %}
+                <div class="page-header">
+                    <img width="125" src="/static/images/large-opt.png" class="pull-right">
+                    <h1>Monster Zoo - Playtest</h1>
+                </div>
+                <p class="lead">Read the <a data-toggle="modal" href="#rules"><code>quickplay rules</code></a> (note: the online version is slightly different from the full rules).</p>
+                <!-- Modal -->
+                <div class="modal fade" id="rules">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h3 class="modal-title">Game Rules</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>Monster Zoo is a deckbuilding game for 2-4 players.</p>
+                                <p><b>Goal</b></p>
+                                <p>Be the first player to build a Zoo worth 30 points.</p>
+                                <p><b>How to Play</b></p>
+                                <p>During your turn:</p>
+                                <p><ul>
+                                    <li>Play any number of cards from your hand.</li>
+                                    <li>Use Food to catch cards from The Wild (middle set of cards).</li>
+                                    <li>Caught cards will be placed into your discard pile. When you run out of cards in your deck, your discard pile will become your new deck.</li>
+                                    <li>Move Monsters into your Zoo for points.</li>
+                                    <li>Card with "Zoo Effects" give you a bonus at the beginning of your turn.</li>
+                                </ul></p>
+                                <p>End of turn:</p>
+                                <p><ul>
+                                    <li>Draw until you have at least 5 cards in your hand.</li>
+                                </ul></p>
+                                <p><b>Playtest Notes:</b></p>
+                                <p>This is a buggy play test system and the game may potentially break on you. Many of the cards/features from the game are not fully developed in the online version yet. Thanks for testing!</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div> <!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /modal -->
+                <!-- Modal -->
+
+                <!-- Modal -->
+                <div class="modal fade" id="login-modal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Login</h3>
+                            </div>
+                            <div class="modal-body">
+                                 <form id="login">
+                                    <p>Please type in your nickname and press enter.</p>    
+                                    <div class="input-group">
+                                        <input type="text" id="username" class="form-control">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="submit">Join Game</button>
+                                        </span>
+                                    </div>
+                                </form>
+                            </div>
+                        </div> <!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /modal -->
+                <!-- Modal -->
+                <div class="modal fade" id="win-message">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>GAME OVER</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>You win! Great job.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div> <!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /modal -->
+                <!-- Modal -->
+                <div class="modal fade" id="lose-message">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>GAME OVER</h3>
+                            </div>
+                            <div class="modal-body">
+                                <p>You lost! Better luck next time.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div> <!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /modal -->
+                <div id="main">
+                        <h2>Game Area</h2>
+                        <!-- Event
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h3 class="page-header">Event</h3>
+                                <div id="event">
+                                </div>
+                            </div>
+                        </div> -->
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h3 class="page-header">Opponent</h3>
+                                <!-- Area for Player 2 Content -->
+                                <div id="player2">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <h3 class="page-header">Zoo</h3>
+                                <div id="player2-zoo">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h3 class="page-header">The Wild</h3>
+                                <!-- Area for The Wild Content -->
+                                <div id="wild">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <h3 class="page-header">Scoreboard</h3>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th width="33%">Player</th>
+                                            <th width="33%"><span class="glyphicon glyphicon-cutlery"></span> Food</th>
+                                            <th width="33%"><span class="glyphicon glyphicon-certificate"></span> Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>You</td>
+                                            <td id="player1-food" class="warning"></td>
+                                            <td id="player1-score" class="success"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Opponent</td>
+                                            <td id="player2-food" class="warning"></td>
+                                            <td id="player2-score" class="danger"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th width="33%">Player</th>
+                                            <th width="33%"><span class="glyphicon glyphicon-align-justify"></span> Deck</th>
+                                            <th width="33%"><span class="glyphicon glyphicon-trash"></span> Discard</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>You</td>
+                                            <td id="player1-deck" class="active"></td>
+                                            <td id="player1-discard" class="active"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Opponent</td>
+                                            <td id="player2-deck" class="active"></td>
+                                            <td id="player2-discard" class="active"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <h3 class="pageheader">Cards Played</h3>
+                                <div id="cards-played"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-8">
+                            <h3 class="page-header">You
+                            <button id="turn-player1" type="button" class="btn btn-danger btn-sm">End Turn</button>
+                            <button id="discard-player1" type="button" class="btn btn-warning btn-sm">Discard & End Turn</button>
+                            </h3>
+                                <!-- Area for Player 1 Content -->
+                                <div id="player1">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <h3 class="page-header">Zoo</h3>
+                                <div id="player1-zoo">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <h2 class="page-header">Chat Area</h2>
+                                <div id="chat">
+                                    <!--
+                                    <div id="nickname">
+                                        <form id="login-form">
+                                            <p>Please type in your nickname and press enter.</p>
+                                            <input id="username">
+                                        </form>
+                                    </div>
+                                    -->
+                                    <div id="messages">
+                                        <div id="lines"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <form id="send-message">
+                                        <input id="message">
+                                        <button>Send</button>
+                                    </form>
+                                </div>
+                                <div id="game">
+                                    <div id="opponent">
+                                    </div>
+                                    <div id="wild">
+                                    </div>
+                                    <div id="player">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <h2 class="page-header">Play History</h2>
+                                <div id="play-history">
+                                    <div id="play-messages">
+                                        <div id="play-lines"></div>
+                                    </div>
+                                </div>
+                        </div>
+                </div>
+
+<script>
+    $(function() {
+        $(window).load(function() {
+            socket.emit('game_connect', {{ game_id }});
+        });
+
+        // Load up the login modal
+        $('#login-modal').modal('show');
+
+        // Bind to login form
+        $('#login').submit(function() {
+            socket.emit('login', $('#username').val(), function(set) {
+                if (set) {
+                    clear();
+                    return $('#chat').addClass('nickname-set');
+                }
+            });
+            $('#login').css('visibility','hidden');
+            $('#login-modal').modal('hide');
+            return false;
+        });
+
+        // Bind to send message form
+        $('#send-message').submit(function() {
+            socket.emit('user message', $('#message').val());
+            $('#message').val('').focus();
+            // $('#lines').get(0).scrollTop =100000000000;
+            setTimeout(function() {
+                $("#lines").scrollTop($("#lines")[0].scrollHeight);
+            }, 10);
+            return false;
+        });
+
+        function clear () {
+            $('message').val('').focus();
+        };
+
+        // Bind to deal button
+        $('#deal-player1').click(function() {
+            socket.emit('deal', socket.socket.sessionid );
+        });
+
+        // Bind to end turn button
+        $('#turn-player1').click(function() {
+            socket.emit('turn');
+        });
+
+        // Bind to discard end turn button
+        $('#discard-player1').click(function() {
+            $('#player1-zoo .playbutton .btn').hide();
+            $('#player1 .playbutton .btn').show();
+            $('#player1 .play-this').html('Discard');
+            $('#player1 .playbutton .btn').toggleClass('play-this discard-this');
+            $('#player1 .playbutton .btn').toggleClass('btn-default btn-info');
+            $('#discard-player1').hide();
+        });
+
+        // Bind to discard this buttons
+        $('.row').on('click', '#player1 .discard-this', function(event) {
+            socket.emit('discard', this.name);
+        });
+
+        // Bind the card play this buttons
+        $('.row').on('click', '#player1 .play-this', function(event) {
+            console.log(this.name);
+            console.log("Clicked on a play this button.");
+            socket.emit('play', this.name);
+        });
+
+        // Bind the select card buttons
+        $('.row').on('click', '#player1 .pick-this', function(event) {
+            console.log("Clicked on a pick this button.");
+            socket.emit('selected_card', this.name);
+        });
+
+        // Bind the select card zoo buttons
+        $('.row').on('click', '#player1-zoo .pick-this', function(event) {
+            console.log("Clicked on a pick this button in the Zoo.");
+            socket.emit('selected_card_from_zoo', this.name);
+        });
+
+        // Bind the select card other zoo buttons
+        $('.row').on('click', '#player2-zoo .pick-this', function(event) {
+            console.log("Clicked on a pick this button in the Zoo.");
+            socket.emit('selected_card_from_other_zoo', this.name);
+        });
+
+        // Bind the select card zoo buttons
+        $('.row').on('click', '#wild .select-this', function(event) {
+            console.log("Clicked on a pick this button in the Wild.");
+            socket.emit('selected_card_from_wild', this.name);
+        });
+
+        // Bind the card buy this buttons
+        $('.row').on('click', '.buy-this', function(event) {
+            socket.emit('buy', this.name);
+        });
+
+        // Bind the card buy this buttons
+        $('.row').on('click', '.remodel-this', function(event) {
+            socket.emit('remodel', this.name);
+        });
+    });
+</script>
+{% endblock content %}
