@@ -10,6 +10,10 @@ $(function() {
         window.location = '/room/' + game_id;
     });
 
+    socket.on('alert', function(msg) {
+        console.log(msg);
+    });
+
     socket.on('users-online', function(socketids) {
         $('#users-online').empty();
         console.log('try to empty');
@@ -78,17 +82,19 @@ $(function() {
 
     socket.on('turn', function(player) {
         if (player == this.socket.sessionid) {
-            turn = false;
-            $('#turn-player1').hide();
-            $('#discard-player1').hide();
-            $('.btn').hide();
-        }
-        else {
+            console.log('This is my turn');
             turn = true;
             $('.btn').hide(); // hide all buttons
             $('#turn-player1').show(); // show the "end turn" button
             $('#discard-player1').show();
             $('#player1 .play-this').show(); // show the "play this card" buttons
+        }
+        else {
+            console.log('not my turn');
+            turn = false;
+            $('#turn-player1').hide();
+            $('#discard-player1').hide();
+            $('.btn').hide();
         };
     });
 

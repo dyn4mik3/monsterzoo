@@ -17,7 +17,7 @@ from werkzeug.exceptions import NotFound
 from flask import Flask, Response, flash, request, session, render_template, url_for, redirect
 
 # import game logic from monsterzoo.py
-from monsterzoo import *
+from monsterzoo2 import *
 
 # import logging functions to setup log file
 from datetime import datetime
@@ -143,6 +143,21 @@ class PlayerMixin(object):
         for socket_id in sockets:
             self.socket.server.sockets[socket_id].send_packet(pkt)
 
+    def broadcast_to_room(self, room, event, *args):
+        """ 
+        This is sent to all in the room (in this particular Namespace)
+        """
+        pkt = dict(type="event",
+                   name=event,
+                   args=args,
+                   endpoint=self.ns_name)
+        room_name = self._get_room_name(room)
+        for sessid, socket in self.socket.server.sockets.iteritems():
+            if 'rooms' not in socket.session:
+                continue
+            if room_name in socket.session['rooms']:
+                socket.send_packet(pkt)
+
 class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     # Pseudocode for user management
     # User created for everyone logging in (cookie)
@@ -164,6 +179,7 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
     waiting = []
     active_games = []
     current_socket = {}
+    socket_player = {} # dictionary with socket_ids as key, player objects as values
 
     def log(self, message):
         app.logger.info("{0}: [{1}] {2}".format(datetime.now(),self.socket.sessid, message))
@@ -177,6 +193,10 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.room = 'lobby'
         self.join('lobby') # start all users in the main lobby
         self.username = None
+        self.selected_card = None
+        self.selected_cards = []
+        self.selected_cards_wild = []
+        self.play_stack = []
         self.user_id = None
         # if user has cookie, assign variables from cookie
         try:
@@ -251,65 +271,67 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.log('Game %r has the following Players: %r' % (new_game,players))
         GameNamespace.active_games.append(new_game)
         self.log('Active games: %r' % GameNamespace.active_games)
-        # get the current sockets for each player
         player_sockets = self.get_player_sockets(players)
         self.log('Player Sockets: %r' % player_sockets)
-        # set the first player's turn
-        self.broadcast_to_sockets(player_sockets, 'turn', players[1].player_id)
-        players[0].turn = True
         self.log("Start game function complete")
         # send to game_id to clients
         self.broadcast_to_sockets(player_sockets, 'game-start', new_game.game_id)
+        # on game-start, client loads ups a new url with the game id
         return new_game
 
     def get_food_discount(self, game):
-        for player in game.players:
-            if player.turn == True:
-                return player.food_discount
+        # send back the current turn player's food discount
+        return game.turn.food_discount
 
-    def render_game(self, game):
-        # NEED TO FIX THIS - RIGHT NOW RENDERING AFFECTS ALL PLAYERS. IT SHOULD ONLY AFFECT PLAYERS ASSOCIATED WITH GAME
-        # calculate score
+    def render_game(self):
+        game = self.game
+        # calculate scores: food, score.
         game.calculate_scores()
         # render players
         player_sockets = self.get_player_sockets(game.players)
+        # broadcast game information to room
         for player in game.players:
             cards = player.hand.cards
             zoo = player.zoo.cards
-            self.broadcast_to_sockets(player_sockets,'empty', player.socket_id)
+            self.broadcast_to_room(game.game_room,'empty', player.socket_id)
             location = 0
             for card in cards: # render cards in hand
                 #self.log('Rendering card with info %r, %r, %r, %r, %r, %r' % (player.player_id, card.name, card.cost, card.image, card.description, location))
-                self.broadcast_to_sockets(player_sockets,'render_card', player.socket_id, card.name, card.cost, card.image, card.description, card.card_family, location)
+                print "Game: %r" % game.game_room
+                self.broadcast_to_room(game.game_room,'render_card', player.socket_id, card.name, card.cost, card.image, card.description, card.card_family, location)
                 location += 1
-            self.broadcast_to_sockets(player_sockets, 'empty_zoo', player.socket_id)
+            self.broadcast_to_room(game.game_room, 'empty_zoo', player.socket_id)
             location = 0
-            self.broadcast_to_sockets(player_sockets, 'food', player.socket_id, player.food)
+            self.broadcast_to_room(game.game_room, 'food', player.socket_id, player.food)
             for card in zoo: # render cards in zoo
-                self.broadcast_to_sockets(player_sockets,'render_zoo', player.socket_id, card.name, card.cost, card.image, card.description, card.remodel, location)
+                self.broadcast_to_room(game.game_room,'render_zoo', player.socket_id, card.name, card.cost, card.image, card.description, card.remodel, location)
                 location += 1
-            self.broadcast_to_sockets(player_sockets,'score', player.socket_id, player.score)
-            self.broadcast_to_sockets(player_sockets, 'food_discount', player.socket_id, player.food_discount)
-            self.broadcast_to_sockets(player_sockets, 'deck_count', player.socket_id, len(player.deck.cards))
-            self.broadcast_to_sockets(player_sockets, 'discard_count', player.socket_id, len(player.discard.cards))
-            self.broadcast_to_sockets(player_sockets, 'cards_played', player.socket_id, len(player.played.cards))
+            self.broadcast_to_room(game.game_room,'score', player.socket_id, player.score)
+            self.broadcast_to_room(game.game_room, 'food_discount', player.socket_id, player.food_discount)
+            self.broadcast_to_room(game.game_room, 'deck_count', player.socket_id, len(player.deck.cards))
+            self.broadcast_to_room(game.game_room, 'discard_count', player.socket_id, len(player.discard.cards))
+            self.broadcast_to_room(game.game_room, 'cards_played', player.socket_id, len(player.played.cards))
         # render wild
         food_discount = self.get_food_discount(game)
         cards = game.wild.hand.cards
         location = 0
-        self.broadcast_to_sockets(player_sockets, 'empty', 'wild')
-        #self.broadcast_event('empty', 'wild')
+        self.broadcast_to_room(game.game_room, 'empty', 'wild')
         for card in cards:
-            self.broadcast_to_sockets(player_sockets,'render_wild', 'wild', card.name, max(0,card.cost - food_discount), card.image, card.description, location)
+            self.broadcast_to_room(game.game_room,'render_wild', 'wild', card.name, max(0,card.cost - food_discount), card.image, card.description, location)
             #self.broadcast_event('render_wild', 'wild', card.name, max(0,card.cost - food_discount), card.image, card.description, location)
             location += 1
+        # render player turn (buttons / actions)
+        self.log("Location of current turn %r in array %r player is %r" % (game.turn, game.players, game.players.index(game.turn)))
+        self.log('Current turn socket: %r' % game.turn.socket_id)
+
+        # render end game state
         if game.state == 'end':
             score_dictionary = {}
             for player in game.players:
                 score_dictionary[player.socket_id] = player.score
             # get player_id for the winning score
             winner = max(score_dictionary, key=score_dictionary.get)
-            self.broadcast_to_sockets(player_sockets,'game_over', winner)
+            self.broadcast_to_room(game.game_room,'game_over', winner)
             self.log('Game over. Winner is %r' % winner)
 
     def get_game_from_id(self,game_id):
@@ -330,13 +352,125 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
 
     def on_game_connect(self, game_id):
         # This function handles a user connecting to a game URL
+        # and allows for a user to join a in-progress game
         game = self.get_game_from_id(game_id)
-        self.room = str(game.game_id)
-        self.log("Game ID:%r - String: %r" % (game.game_id, str(game.game_id)))
+        player = self.get_player_from_user_id(game.players, self.user_id)
+        # add player object to sessid key
+        GameNamespace.socket_player[self.socket.sessid] = player
+        self.log("Player %r found for user_id %r" % (player, self.user_id))
+        self.game = game
+        self.player = player
+        self.room = game.game_room
+        self.log("Game ID:%r - String: %r" % (game.game_id, game.game_room))
         self.join(self.room)
         self.set_player_sockets(game)
-        self.render_game(game)
+        self.render_game()
+        self.broadcast_to_room(game.game_room, 'turn', game.turn.socket_id)
         self.output_everything_to_log()
+
+    def get_player_from_user_id(self, players_in_room, user_id):
+        for player in players_in_room:
+            if player.player_id == user_id:
+                return player
+        return None
+
+    def on_play(self, location):
+        self.log('Player trying to play card @ location: %s' % location)
+        location = int(location)
+        game = self.game
+        player = self.player
+        card = player.hand.cards[location]
+        self.card = card
+        card.socket = self
+        card.play(player)
+        username = self.username
+        self.broadcast_to_room(game.game_room, 'play-update', username, "Played %s. (%s)" % (card.name, card.description))
+        self.log("%s: Played %s. (%s)" % (username, card.name, card.description))
+
+    def on_turn(self):
+        player = self.player
+        game = self.game
+        self.log("Current Turn Player %r" % game.turn)
+        self.game.setup_next_turn(player)
+        self.log("Current Turn Player %r" % game.turn)
+        self.play_stack = [] # rest play stack
+        self.render_game()
+        self.broadcast_to_room(game.game_room, 'turn', game.turn.socket_id)
+        self.broadcast_to_room(game.game_room, 'play-update', 'Game Event', 'End of Turn')
+        self.log('End Turn')
+
+    def on_discard(self, card_index):
+        # used when player is discarding right before end of turn
+        card_index = int(card_index)
+        player = GameNamespace.socket_player[self.socket.sessid]
+        card = player.hand.cards.pop(card_index)
+        player.discard.add_to_bottom(card)
+        self.render_game()
+        #self.render_discard(player.player_id)
+
+    def on_selected_card(self, index):
+        player = self.player
+        self.selected_card = index
+        card = player.hand.cards[int(index)] # get card object from the index number
+        card.socket = self
+        self.selected_cards.append(card) # add cards to the list of selected cards
+        self.log('Selected Card is Now: %r %r' % (card, self.selected_card))
+        self.log('Trying to play: %r' % self.card)
+        self.card.play(player)
+
+    def on_buy(self, location):
+        location = int(location)
+        player = self.player
+        wild = self.game.wild
+        card = wild.hand.cards[location]
+        self.log('Buying card %r' % card)
+        self.broadcast_to_room(self.game.game_room, 'play-update', self.username, "Bought %s. (%s)" % (card.name, card.description))
+        self.log("%s: Bought %s. (%s)" % (self.username, card.name, card.description))
+        modified_card_cost = max(0,(card.cost - player.food_discount))
+        if modified_card_cost <= player.food:
+            player.food = player.food - modified_card_cost
+            wild.hand.remove_card(card)
+            player.discard.add_to_bottom(card)
+            try:
+                wild.deal(1)
+            except:
+                self.log('No more cards in the wild.')
+            self.render_game()
+        else:
+            print "Card cost greater than food + food_discount"
+
+    def on_selected_card_from_wild(self, index):
+        player = self.player
+        card = self.game.wild.hand.cards[int(index)]
+        card.socket = self
+        self.selected_cards_wild.append(card)
+        self.card.play(player)
+    
+    def on_selected_card_from_zoo(self, index):
+        player = self.player
+        self.selected_card = index
+        card = player.zoo.cards[int(index)] # get card object from the index number
+        card.socket = self
+        self.selected_cards.append(card) # add cards to the list of selected cards
+        self.log ('Selected Card from Zoo is Now: %r %r' % (card, self.selected_card))
+        self.log ('Playing card from self.card %r' % self.card)
+        self.card.play(player)
+
+    def on_selected_card_from_other_zoo(self, index):
+        player = self.player
+        player_index = self.game.players.index(player)
+        opponent = None
+        if player_index == 0:
+            opponent = self.game.players[1]
+        elif player_index == 1:
+            opponent = self.game.players[0]
+        self.selected_card = index
+        card = opponent.zoo.cards[int(index)] # get card object from the index number
+        card.socket = self
+        self.selected_cards.append(card) # add cards to the list of selected cards
+        self.log ('Selected Card from Zoo is Now: %r %r' % (card, self.selected_card))
+        self.log ('Playing card from self.card %r' % self.card)
+        self.card.play(player)
 
     #####################################OLD CODE###################################
     '''

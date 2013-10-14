@@ -78,11 +78,11 @@ class Card(object):
 
     def get_other_player(self, player):
         # this is buggy
-        player_index = self.socket.game.players.index(player)
+        player_index = player.game.players.index(player)
         if player_index == 0:
-            return self.socket.players[1]
+            return player.game.players[1]
         elif player_index == 1:
-            return self.socket.players[0]
+            return player.game.players[0]
         else:
             print "Something went wrong when getting the other player index"
 
@@ -988,6 +988,7 @@ class Player(object):
         self.player_id = player_id
         self.turn = False
         self.socket_id = None
+        self.game = None
     
     def deal(self, num):
         cards = []
@@ -1088,7 +1089,12 @@ class Game(object):
         self.wild = Wild()
         self.game_id = random.randint(1,1000000000000000)
         self.game_room = str(self.game_id)
-        self.turn = self.players[0]
+        # set first player as first turn
+        first_player = self.players[0]
+        self.turn = first_player
+        # set variable in Player to reference the game
+        for player in self.players:
+            player.game = self
 
         # shuffle decks, deal
         for player in self.players:
@@ -1183,18 +1189,24 @@ class Game(object):
             self.turn(player)
     
     def setup_next_turn(self, player):
+        # Get location of current turn's player in player index. Move forward one.
+        # If last player, move to beginning.
+        # player = self.turn
         player_location = self.players.index(player)
         if player == self.players[-1]:
             # player is last player, next player set to location 0
             next_player = self.players[0]
+            print "Setting next player to 0"
         else:
             next_player = self.players[(player_location + 1)]
+            print "Setting next player to %r" % (player_location + 1)
         for x in self.players:
             if x == next_player:
                 x.turn = True
             else:
                 x.turn = False
         self.turn = next_player
+        print "Next player will be %r" % next_player
         print "Moving played cards to discard"
         player.discard.cards = player.discard.cards + player.played.cards
         print "Emptying played cards"
