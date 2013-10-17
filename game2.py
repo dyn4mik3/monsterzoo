@@ -15,6 +15,9 @@ from werkzeug.exceptions import NotFound
 
 # import flask stuff
 from flask import Flask, Response, flash, request, session, render_template, url_for, redirect
+from flask.ext.sqlalchemy import SQLAlchemy
+
+from rauth.service import OAuth2Service
 
 # import game logic from monsterzoo.py
 from monsterzoo2 import *
@@ -24,9 +27,18 @@ from datetime import datetime
 import logging
 from logging.handlers import RotatingFileHandler
 
+# Flask config
+SQLALCHEMY_DATABASE_URI = 'sqlite:///facebook.db'
+SECRET_KEY = '\x03R\xe8!\xfdZ\x87*\xe9\x07sVI\x88|tt"\xdcb\xab=\xf8;'
+DEBUG = True
+FB_CLIENT_ID = '297773420361226'
+FB_CLIENT_SECRET = 'aafee6e7958a5912d9463c0546a70633'
+
 # create a Flask app (the main web application)
 app = Flask(__name__)
 app.debug = True
+app.config.from_object(__name__)
+db = SQLAlchemy(app)
 
 # setup logging, with default level of INFO and higher
 handler = RotatingFileHandler('console.log', maxBytes=1000000, backupCount=5)
@@ -34,6 +46,37 @@ handler.setLevel(logging.INFO)
 app.logger.addHandler(handler)
  
 app.secret_key = '\x03R\xe8!\xfdZ\x87*\xe9\x07sVI\x88|tt"\xdcb\xab=\xf8;'
+
+# rauth OAuth 2.0 service wrapper
+graph_url = 'https://graph.facebook.com/'
+facebook = OAuth2Service(name='facebook',
+                        authorize_url='https://www.facebook.com/dialog/oauth',
+                        access_token_url=graph_url + 'oauth/access_token',
+                        client_id=app.config['FB_CLIENT_ID'],
+                        client_secret=app.config['FB_CLIENT_SECRET'],
+                        base_url=graph_url)
+
+# models
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True)
+    fb_id = db.Column(db.String(120))
+
+    def __init__(self, username, fb_id):
+        self.username = username
+        self.fb_id = fb_id
+
+    def __repr__(self):
+        return '<User %r>' % self.username
+
+    @staticmethod
+    def get_or_create(username, fb_id):
+        user = User.query.filter_by(username=username).first()
+        if user is None:
+            user = User(username, fb_id)
+            db.session.add(user)
+            db.session.commit()
+        return user
 
 # create my views
 @app.route('/')
@@ -50,6 +93,38 @@ def index():
 @app.route('/robots.txt')
 def robots():
     return app.send_static_file('robots.txt')
+
+@app.route('/facebook/login')
+def facebook_login():
+    redirect_uri = url_for('authorized', _external=True)
+    print redirect_uri
+    params = {'redirect_uri': redirect_uri}
+    print facebook
+    return redirect(facebook.get_authorize_url(**params))
+
+@app.route('/facebook/authorized')
+def authorized():
+    # check to make sure the user authorzied the request
+    if not 'code' in request.args:
+        flash('You did not authorize the request')
+        return redirect(url_for('index'))
+
+    # make a request for the access token credentials using code
+    redirect_uri = url_for('authorized', _external=True)
+    data = dict(code=request.args['code'], redirect_uri=redirect_uri)
+
+    authorized_session = facebook.get_auth_session(data=data)
+
+    # the 'me' response
+    me = authorized_session.get('me').json()
+    print me
+
+    user = User.get_or_create(me['name'], me['id'])
+    session['user_id'] = user.id
+    session['username'] = user.username
+    flash('Logged in as ' + me['name'])
+    print url_for('index')
+    return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -893,4 +968,5 @@ def socketio(remaining):
 
 # start the app
 if __name__ == '__main__':
-   app.run()
+    db.create_all()
+    app.run()
