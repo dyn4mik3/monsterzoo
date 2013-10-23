@@ -46,6 +46,7 @@
                 <h1>Login</h1>
             </div>
             {% if not session['username'] %}
+            <a href="{{ url_for('facebook_login')}}"><img src="/static/images/fb_button.png"/></a>
             <div class="well">
                 <form class="form-inline" role="form" id="login" action="/login" method="post">
                     <div class="form-group">
@@ -62,8 +63,10 @@
                 <button type="button" id="ready" class="btn btn-default" data-complete-text="Waiting...">Read to Play</button> 
                 <script>
                     $('#ready').click(function (){
-                        $('#ready').attr("disabled","disabled");
                         $('#ready.btn').button('complete');
+                        setTimeout(function() {
+                            $('#ready').attr("disabled","disabled").addClass('disabled');
+                        }, 0);
                         socket.emit('ready');
                     });
                 </script>

@@ -547,6 +547,12 @@ class GameNamespace(BaseNamespace, RoomsMixin, BroadcastMixin, PlayerMixin):
         self.log ('Playing card from self.card %r' % self.card)
         self.card.play(player)
 
+    def on_user_message(self, msg):
+        self.log('User message: {0}'.format(msg))
+        #username = self.usernames[user_id]
+        self.broadcast_to_room(self.game.game_room, 'message', self.username, msg)
+        return True
+ 
     #####################################OLD CODE###################################
     '''
     nicknames = {} # stores a dictionary with sessionids as key, Player objects as values
