@@ -140,6 +140,168 @@ class Card(object):
             print "Card is not in the play stack"
             return False
 
+class OneOogly(Card):
+    def __init__(self):
+        self.name = "One Oogly"
+        self.description = "1 Food"
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 2
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 1
+        self.image = "/static/images/Oogly.png"
+
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played One Oogly"
+        self.socket.render_game()
+
+class TwoOogly(Card):
+    def __init__(self):
+        self.name = "Two Oogly"
+        self.description = "2 Food"
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 2
+        self.image = "/static/images/Oogly.png"
+
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played Two Oogly"
+        self.socket.render_game()
+
+class ThreeOogly(Card):
+    def __init__(self):
+        self.name = "Three Oogly"
+        self.description = "3 Food"
+        self.card_type = "Monster"
+        self.card_family = "Oogly"
+        self.cost = 5
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 3
+        self.image = "/static/images/Oogly.png"
+
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played Three Oogly"
+        self.socket.render_game()
+
+class OneBoogly(Card):
+    def __init__(self):
+        self.name = "One Boogly"
+        self.description = "1 Food"
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 2
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 1
+        self.image = "/static/images/Boogly.png"
+
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played One Boogly"
+        self.socket.render_game()
+
+class TwoBoogly(Card):
+    def __init__(self):
+        self.name = "Two Boogly"
+        self.description = "2 Food"
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 2
+        self.image = "/static/images/Boogly.png"
+
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played Two Boogly"
+        self.socket.render_game()
+
+class ThreeBoogly(Card):
+    def __init__(self):
+        self.name = "Three Boogly"
+        self.description = "3 Food"
+        self.card_type = "Monster"
+        self.card_family = "Boogly"
+        self.cost = 5
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 3
+        self.image = "/static/images/Boogly.png"
+
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played Three Boogly"
+        self.socket.render_game()
+
+class OneZoogly(Card):
+    def __init__(self):
+        self.name = "One Zoogly"
+        self.description = "1 Food"
+        self.card_type = "Monster"
+        self.card_family = "Zoogly"
+        self.cost = 2
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 1
+        self.image = "/static/images/Zoogly.png"
+
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played One Zoogly"
+        self.socket.render_game()
+
+class TwoZoogly(Card):
+    def __init__(self):
+        self.name = "Two Zoogly"
+        self.description = "2 Food"
+        self.card_type = "Monster"
+        self.card_family = "Zoogly"
+        self.cost = 3
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 2
+        self.image = "/static/images/Zoogly.png"
+
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played Two Zoogly"
+        self.socket.render_game()
+
+class ThreeZoogly(Card):
+    def __init__(self):
+        self.name = "Three Zoogly"
+        self.description = "3 Food"
+        self.card_type = "Monster"
+        self.card_family = "Zoogly"
+        self.cost = 5
+        self.remodel = False
+        self.remodel_card = None
+        self.food = 3
+        self.image = "/static/images/Zoogly.png"
+
+    def play(self, player):
+        self.discard(player)
+        player.food += self.food
+        print "Played Three Zoogly"
+        self.socket.render_game()
+
 class ZooglyZoo(Card):
     def __init__(self):
         self.name = "Zoogly Zoo"
@@ -975,7 +1137,7 @@ class Hand(Deck):
     
 class Player(object):
     def __init__(self, player_id=""):
-        starter_deck = [ViktorZoogly(), LanzoBoogly(), SluggoZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
+        starter_deck = [ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), ZookeeZoogly(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks(), DirtySocks()]
         self.deck = Deck()
         self.deck.cards = list(starter_deck)
         self.hand = Hand()
@@ -1073,9 +1235,41 @@ class Wild(Player):
                 MunchOogly(),
                 MunchOogly()
             ]
+        kids_deck = [
+                OneOogly(),
+                TwoOogly(),
+                ThreeOogly(),
+                OneBoogly(),
+                TwoBoogly(),
+                ThreeBoogly(),
+                OneZoogly(),
+                TwoZoogly(),
+                ThreeZoogly(),
+                OneOogly(),
+                TwoOogly(),
+                ThreeOogly(),
+                OneBoogly(),
+                TwoBoogly(),
+                ThreeBoogly(),
+                OneZoogly(),
+                TwoZoogly(),
+                ThreeZoogly(),
+                OneOogly(),
+                TwoOogly(),
+                ThreeOogly(),
+                OneBoogly(),
+                TwoBoogly(),
+                ThreeBoogly(),
+                OneZoogly(),
+                TwoZoogly(),
+                ThreeZoogly()
+            ]
         self.event_card = random.choice(event_deck)
         self.deck = Deck()
+        # TESTING ADULT VERSION
         self.deck.cards = list(starter_deck)
+        # TESTING KIDS VERSION
+        #self.deck.cards = list(kids_deck)
         self.deck.shuffle_cards()
         self.hand = Hand()
         self.discard = Deck()
